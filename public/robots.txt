@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
-Sitemap: /sitemap.xml
+Sitemap: https://classweave.vercel.app/sitemap.xml
