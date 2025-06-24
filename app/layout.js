@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
 import ConsentSettings from "./components/ConsentSettings";
+import ClientOnly from "./components/ClientOnly";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,28 +35,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* Google Analytics with Consent Mode - Required in HEAD for verification */}
+        {/* Google Analytics - Basic tracking code */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-88398TJT8Q"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              
-              // Set default consent mode
-              gtag('consent', 'default', {
-                'analytics_storage': 'denied',
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'wait_for_update': 500,
-              });
-              
-              gtag('js', new Date());
-              gtag('config', 'G-88398TJT8Q');
-            `,
-          }}
-        />
         
         {/* AdSense Verification Code */}
         <script 
@@ -65,12 +46,33 @@ export default function RootLayout({ children }) {
         ></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        {/* Google Analytics with Consent Mode - Moved to body to prevent hydration issues */}
+        <Script id="google-analytics-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            
+            // Set default consent mode
+            gtag('consent', 'default', {
+              'analytics_storage': 'denied',
+              'ad_storage': 'denied',
+              'ad_user_data': 'denied',
+              'ad_personalization': 'denied',
+              'wait_for_update': 500,
+            });
+            
+            gtag('js', new Date());
+            gtag('config', 'G-88398TJT8Q');
+          `}
+        </Script>
 
         <UserProvider>
           <Navbar />
           {children}
-          <CookieConsent />
-          <ConsentSettings />
+          <ClientOnly>
+            <CookieConsent />
+            <ConsentSettings />
+          </ClientOnly>
           <Toaster 
             position="top-right"
             toastOptions={{

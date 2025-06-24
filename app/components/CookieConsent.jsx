@@ -79,7 +79,9 @@ const CookieConsent = () => {
   };
 
   // Don't render anything during SSR or if not visible
-  if (!isClient || !isVisible) return null;
+  if (!isClient) return null;
+  
+  if (!isVisible) return null;
 
   return (
     <div

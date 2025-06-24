@@ -6,16 +6,21 @@ export async function GET(request, { params }) {
   try {
     await connectDB();
     
-    // Access params directly without destructuring
+    // In Next.js 15, params must be awaited
     const { id } = await params;
+    
+    console.log('Sample student request for ID:', id); // Add logging
     
     // First, try to fetch the actual student from the database
     const student = await Student.findById(id).lean();
     
     if (student) {
+      console.log('Found actual student:', student.name);
       // Return the actual student data from the database
       return NextResponse.json(student);
     }
+    
+    console.log('Student not found in DB, using sample data'); // Add logging
     
     // If student not found in database, return fallback sample data
     const sampleStudents = {
@@ -60,14 +65,17 @@ export async function GET(request, { params }) {
     const sampleStudent = sampleStudents[id];
 
     if (!sampleStudent) {
+      console.log('Sample student not found for ID:', id);
       return NextResponse.json({ error: 'Sample student not found' }, { status: 404 });
     }
 
+    console.log('Returning sample student:', sampleStudent.name);
     return NextResponse.json(sampleStudent);
   } catch (error) {
     console.error('Error fetching sample student:', error);
+    console.error('Error stack:', error.stack);
     return NextResponse.json(
-      { error: 'Failed to fetch sample student' },
+      { error: 'Failed to fetch sample student', details: error.message },
       { status: 500 }
     );
   }

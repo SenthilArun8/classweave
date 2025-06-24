@@ -44,7 +44,9 @@ const ConsentSettings = () => {
     window.location.reload();
   };
 
-  if (!isClient || !consentStatus) return null;
+  if (!isClient) return null;
+  
+  if (!consentStatus) return null;
 
   return (
     <>
