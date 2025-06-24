@@ -30,19 +30,14 @@ const CookieConsent = () => {
     // Only run on client-side
     if (typeof window === 'undefined') return;
 
-    // Load Google Analytics
-    if (!document.querySelector('script[src*="googletagmanager.com"]')) {
-      const gaScript = document.createElement('script');
-      gaScript.async = true;
-      gaScript.src = "https://www.googletagmanager.com/gtag/js?id=G-SKNEMBN5EP";
-      document.head.appendChild(gaScript);
-
-      gaScript.onload = () => {
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){window.dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-SKNEMBN5EP');
-      };
+    // Update Google Analytics consent
+    if (window.gtag) {
+      window.gtag('consent', 'update', {
+        'analytics_storage': 'granted',
+        'ad_storage': 'granted',
+        'ad_user_data': 'granted',
+        'ad_personalization': 'granted'
+      });
     }
 
     // Load Google AdSense
@@ -67,10 +62,20 @@ const CookieConsent = () => {
   const handleDecline = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('cookieConsent', 'declined');
+      
+      // Update Google Analytics consent to denied
+      if (window.gtag) {
+        window.gtag('consent', 'update', {
+          'analytics_storage': 'denied',
+          'ad_storage': 'denied',
+          'ad_user_data': 'denied',
+          'ad_personalization': 'denied'
+        });
+      }
     }
     setUserConsent('declined');
     setIsVisible(false);
-    // No scripts loaded if declined
+    // No additional scripts loaded if declined
   };
 
   // Don't render anything during SSR or if not visible

@@ -8,17 +8,10 @@ import Link from 'next/link';
 const Footer = () => {
   const business = {
     name: 'ClassWeave',
-    email: 'senthilarun08@gmail.com',
+    email: 'classweaveai@gmail.com',
     description: 'ClassWeave is an innovative educational platform that provides seamless and interactive learning experiences for educators, students, and parents.',
     keywords: ['education', 'learning platform', 'student management', 'educational technology', 'classroom tools', 'activity generation'],
-    url: 'https://classweave.com',
-    // Google Maps Embed URL - IMPORTANT: Steps
-    // To get this:
-    // 1. Go to Google Maps (maps.google.com)
-    // 2. Search for your business location.
-    // 3. Click "Share" -> "Embed a map" -> "COPY HTML".
-    // 4. Copy the `src` attribute value from the `<iframe>` tag you get.
-    googleMapsEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3909.117195439589!2d77.73041492576137!3d11.34999518884976!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba96f4e3a7c4907%3A0xa832bdd570043c18!2sPari%20Complex!5e0!3m2!1sen!2sca!4v1717757049449!5m2!1sen!2sca"
+    url: 'https://classweave.vercel.app/',
   };
 
   // Structured data for SEO (JSON-LD)
@@ -30,11 +23,6 @@ const Footer = () => {
     "email": business.email,
     "url": business.url,
     "sameAs": [],
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Coimbatore",
-      "addressCountry": "IN"
-    },
     "contactPoint": {
       "@type": "ContactPoint",
       "email": business.email,
