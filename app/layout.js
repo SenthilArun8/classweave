@@ -19,10 +19,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "ClassWeave - AI-Powered Early Childhood Education",
+  title: "ClassWeave",
   description: "Streamline your daycare and preschool planning with AI-generated activities, personalized stories, and comprehensive student management tools.",
   keywords: "daycare, preschool, early childhood education, AI activities, student management, educational planning",
-  authors: [{ name: "ClassWeave Team" }],
+  authors: [{ name: "Senthil Kirthieswar" }],
   openGraph: {
     title: "ClassWeave - AI-Powered Early Childhood Education",
     description: "Streamline your daycare and preschool planning with AI-generated activities, personalized stories, and comprehensive student management tools.",
@@ -34,6 +34,29 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        {/* Google Analytics with Consent Mode - Required in HEAD for verification */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-88398TJT8Q"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              
+              // Set default consent mode
+              gtag('consent', 'default', {
+                'analytics_storage': 'denied',
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'wait_for_update': 500,
+              });
+              
+              gtag('js', new Date());
+              gtag('config', 'G-88398TJT8Q');
+            `,
+          }}
+        />
+        
         {/* AdSense Verification Code */}
         <script 
           async 
@@ -42,29 +65,6 @@ export default function RootLayout({ children }) {
         ></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {/* Google Analytics with Consent Mode */}
-        <Script id="google-consent-init" strategy="beforeInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            
-            // Set default consent mode
-            gtag('consent', 'default', {
-              'analytics_storage': 'denied',
-              'ad_storage': 'denied',
-              'ad_user_data': 'denied',
-              'ad_personalization': 'denied',
-              'wait_for_update': 500,
-            });
-            
-            gtag('js', new Date());
-            gtag('config', 'G-88398TJT8Q');
-          `}
-        </Script>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-88398TJT8Q"
-          strategy="afterInteractive"
-        />
 
         <UserProvider>
           <Navbar />
