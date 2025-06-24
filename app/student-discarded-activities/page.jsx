@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import axios from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -55,7 +55,7 @@ const normalizeSkills = (skills) => {
   return arr.filter(s => s && typeof s.name === 'string' && typeof s.category === 'string' && s.name && s.category);
 };
 
-export default function StudentDiscardedActivitiesPage() {
+function StudentDiscardedActivitiesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
@@ -173,5 +173,15 @@ export default function StudentDiscardedActivitiesPage() {
         Back
       </button>
     </div>
+  );
+}
+
+export default function StudentDiscardedActivitiesPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-8 text-center">Loading...</div>
+    }>
+      <StudentDiscardedActivitiesContent />
+    </Suspense>
   );
 }

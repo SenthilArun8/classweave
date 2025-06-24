@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function StudentRoute() {
+function StudentRedirect() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -22,5 +22,17 @@ export default function StudentRoute() {
     <div className="pt-20 flex justify-center items-center min-h-screen">
       <div className="text-emerald-700 text-center">Redirecting...</div>
     </div>
+  );
+}
+
+export default function StudentRoute() {
+  return (
+    <Suspense fallback={
+      <div className="pt-20 flex justify-center items-center min-h-screen">
+        <div className="text-emerald-700 text-center">Loading...</div>
+      </div>
+    }>
+      <StudentRedirect />
+    </Suspense>
   );
 }

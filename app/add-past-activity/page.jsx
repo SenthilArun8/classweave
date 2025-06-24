@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function AddPastActivityPage() {
+function AddPastActivityRedirect() {
   // Next.js routing hooks
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,5 +40,22 @@ export default function AddPastActivityPage() {
         <p className="text-sm font-medium">Redirecting to add past activity...</p>
       </div>
     </div>
+  );
+}
+
+export default function AddPastActivityPage() {
+  return (
+    <Suspense fallback={
+      <div className="pt-20 flex justify-center items-center min-h-screen bg-[#f5f0e6]">
+        <div className="text-emerald-700 text-center">
+          {/* Loading spinner */}
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700 mx-auto mb-4"></div>
+          {/* Loading message */}
+          <p className="text-sm font-medium">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AddPastActivityRedirect />
+    </Suspense>
   );
 }

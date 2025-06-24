@@ -1,4 +1,4 @@
-import { getAiInstance } from '../config/googleAuth.js';
+import { getAiInstance } from '@/lib/config/googleAuth';
 
 // Story generation prompt template
 const storyPromptTemplate = (student, context) => `
