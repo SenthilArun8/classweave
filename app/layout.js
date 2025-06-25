@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "ClassWeave",
+  title: "ClassWeave - AI-Powered Early Childhood Education",
   description: "Streamline your daycare and preschool planning with AI-generated activities, personalized stories, and comprehensive student management tools.",
   keywords: "daycare, preschool, early childhood education, AI activities, student management, educational planning",
   authors: [{ name: "Senthil Kirthieswar" }],
@@ -28,7 +28,33 @@ export const metadata = {
     title: "ClassWeave - AI-Powered Early Childhood Education",
     description: "Streamline your daycare and preschool planning with AI-generated activities, personalized stories, and comprehensive student management tools.",
     type: "website",
+    url: "https://classweave.vercel.app",
+    siteName: "ClassWeave",
   },
+  // Add favicon and icon metadata
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+    ],
+    other: [
+      {
+        rel: 'android-chrome-192x192',
+        url: '/android-chrome-192x192.png',
+      },
+      {
+        rel: 'android-chrome-512x512', 
+        url: '/android-chrome-512x512.png',
+      }
+    ]
+  },
+  manifest: '/site.webmanifest',
+  themeColor: '#10b981',
+  viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({ children }) {

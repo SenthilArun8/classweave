@@ -1,0 +1,22 @@
+{
+  "name": "ClassWeave - AI-Powered Early Childhood Education",
+  "short_name": "ClassWeave",
+  "description": "Streamline your daycare and preschool planning with AI-generated activities, personalized stories, and comprehensive student management tools.",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#10b981",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}
