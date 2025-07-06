@@ -117,7 +117,27 @@ export async function POST(request) {
     }
 
     // Initialize Google Auth and get AI instance
-    const googleAuthClient = await initializeGoogleAuth();
+    let googleAuthClient;
+    try {
+      googleAuthClient = await initializeGoogleAuth();
+    } catch (authError) {
+      console.error('❌ Failed to initialize Google Auth:', authError.message);
+      console.log('⚠️ Falling back to backup activity generation');
+      
+      return generateFallbackActivity({ 
+          age, 
+          interests, 
+          personality, 
+          developmentalStage, 
+          availableMaterials,
+          activityLocation,
+          desiredActivityLength,
+          numberOfChildren,
+          childDislikes,
+          discardedActivities
+      });
+    }
+    
     if (!googleAuthClient) {
         console.log('Google Auth client not initialized, using fallback generation');
         return generateFallbackActivity({ 
@@ -214,12 +234,24 @@ export async function POST(request) {
     }
 
   } catch (error) {
-    console.error('API Error:', error);
-    if (error.message.includes('JSON')) {
-        console.error('This may be a credentials JSON parsing error. Check the GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable.');
+    console.error('❌ API Error:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    // Specific handling for Google credentials errors
+    if (error.message.includes('JSON') || error.message.includes('GOOGLE_APPLICATION_CREDENTIALS')) {
+        console.error('🔧 This appears to be a Google credentials issue.');
+        console.error('🔧 Check your GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable.');
+        console.error('🔧 Ensure it contains valid JSON without extra quotes or formatting issues.');
+        
+        // Return a more helpful error in production
+        return NextResponse.json({
+            error: 'Configuration error: Please check Google credentials setup',
+            details: process.env.NODE_ENV === 'development' ? error.message : 'Invalid credentials format'
+        }, { status: 500 });
     }
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: process.env.NODE_ENV === 'development' ? error.message : undefined },
       { status: 500 }
     );
   }
