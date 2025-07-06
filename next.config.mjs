@@ -59,18 +59,7 @@ const nextConfig = {
 
   // Enable experimental features for better performance
   experimental: {
-    optimizeCss: true,
     scrollRestoration: true,
-  },
-
-  // PWA-like features for better mobile SEO
-  async rewrites() {
-    return [
-      {
-        source: '/sitemap.xml',
-        destination: '/api/sitemap',
-      },
-    ];
   },
 };
 

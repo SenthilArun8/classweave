@@ -21,6 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL('https://classweave.vercel.app'),
   title: "ClassWeave - AI-Powered Early Childhood Education",
   description: "Streamline your daycare and preschool planning with AI-generated activities, personalized stories, and comprehensive student management tools.",
   keywords: "daycare, preschool, early childhood education, AI activities, student management, educational planning",
@@ -62,9 +63,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        {/* Google Analytics - Basic tracking code */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-88398TJT8Q"></script>
-        
         {/* AdSense Verification Code */}
         <script 
           async 
@@ -73,6 +71,12 @@ export default function RootLayout({ children }) {
         ></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen flex flex-col`} suppressHydrationWarning={true}>
+        {/* Google Analytics with Next.js Script */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-88398TJT8Q"
+          strategy="afterInteractive"
+        />
+        
         {/* Structured Data for SEO */}
         <Script id="structured-data" type="application/ld+json" strategy="beforeInteractive">
           {`

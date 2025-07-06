@@ -42,7 +42,11 @@ export const metadata = {
     'fine motor activities',
     'gross motor activities',
     'cognitive development activities',
-    
+    'language development activities',
+    'social emotional learning activities',
+    'Simple Science Experiments',
+    'Simple Science Experiments for Kids',
+
   ],
   authors: [{ name: 'ClassWeave', url: 'https://classweave.vercel.app' }],
   creator: 'ClassWeave',
