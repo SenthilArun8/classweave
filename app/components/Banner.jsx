@@ -1,6 +1,26 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import BannerDismissButton from './clientComponents/BannerDismissButton';
 
 const Banner = () => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Check if banner was previously dismissed
+  useEffect(() => {
+    const dismissed = localStorage.getItem('classweave-banner-dismissed');
+    if (dismissed) {
+      setIsVisible(false);
+    }
+  }, []);
+
+  const handleDismiss = () => {
+    setIsVisible(false);
+    localStorage.setItem('classweave-banner-dismissed', 'true');
+  };
+
+  if (!isVisible) return null;
+
   return (
     <div className="relative isolate flex items-center gap-x-6 overflow-hidden bg-emerald-50 px-6 py-2.5 sm:px-3.5 sm:before:flex-1">
       {/* Left blurred shape */}
@@ -39,14 +59,14 @@ const Banner = () => {
           <span className="ml-2 font-semibold text-amber-700">(Beta: Page may take a while to load.)</span>
         </p>
         <a
-          href="#"
+          href="/at-home"
           className="flex-none rounded-full bg-emerald-700 px-3.5 py-1 text-sm font-semibold text-white shadow-xs hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
         >
-          Learn more <span aria-hidden="true">&rarr;</span>
+          Try Now <span aria-hidden="true">&rarr;</span>
         </a>
       </div>
       <div className="flex flex-1 justify-end">
-        <BannerDismissButton />
+        <BannerDismissButton onDismiss={handleDismiss} />
       </div>
     </div>
   );

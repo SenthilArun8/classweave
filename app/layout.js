@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from 'next/script';
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import Banner from "./components/Banner";
 import { UserProvider } from "@/contexts/UserContext";
 import { Toaster } from 'react-hot-toast';
 import Footer from "./components/Footer";
@@ -93,6 +94,7 @@ export default function RootLayout({ children }) {
         </Script>
 
         <UserProvider>
+          <Banner />
           <Navbar />
           <main className="flex-1">
             {children}
