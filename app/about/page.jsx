@@ -1,16 +1,7 @@
 /**
  * About Page Component
  * 
- * Comprehensive about page showcasing Class    {
-      title: "Non-Repetitive Content",
-      description: "Advanced algorithms ensure every generated activity and story is unique, preventing repetition and maintaining engagement.",
-      icon: "🔄"
-    },
-    {
-      title: "Real-Time Analytics",
-      description: "Monitor student development with detailed activity results, engagement metrics, and personalized recommendations.",
-      icon: "📊"
-    }ssion, impact on SDGs,
+ * Comprehensive about page showcasing ClassWeave's mission, impact on SDGs,
  * features, and team information.
  * 
  * FEATURES:
@@ -20,24 +11,87 @@
  * - Team information
  * - Call-to-action sections
  * - Responsive design with consistent styling
+ * - Server-side rendered for better SEO
  */
-
-'use client';
 
 import React from 'react';
 import Link from 'next/link';
-import { useUser } from '@/contexts/UserContext';
+import AboutCTA from '@/app/components/AboutCTA';
+
+// Metadata for SEO and social sharing
+export const metadata = {
+  title: 'About ClassWeave | AI-Powered Early Childhood Education Platform',
+  description: 'Learn about ClassWeave\'s mission to revolutionize early childhood education through AI-powered personalized learning experiences. Supporting UN SDGs and empowering educators worldwide.',
+  keywords: [
+    'early childhood education',
+    'AI education platform',
+    'personalized learning',
+    'educational technology',
+    'child development',
+    'daycare tools',
+    'preschool activities',
+    'at-home learning',
+    'at home activities',
+    'at home activity suggestions',
+    'educational activities',
+    'UN sustainable development goals',
+    'ClassWeave',
+    'Classweave AI',
+    'SDGs',
+    'activity generator',
+    'automatic activity generator',
+    'SDG 4 - Quality Education',
+    'SDG 10 - Reduced Inequalities',
+    'SDG 8 - Decent Work and Economic Growth',
+    'SDG 9 - Industry, Innovation and Infrastructure',
+    'SDG 4',
+  ],
+  authors: [{ name: 'Senthil Kirthieswar', url: 'https://www.linkedin.com/in/senthil-kirthieswar-631631334/' }],
+  creator: 'Senthil Kirthieswar',
+  publisher: 'ClassWeave',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://classweave.vercel.app/about',
+    siteName: 'ClassWeave',
+    title: 'About ClassWeave - AI-Powered Early Childhood Education',
+    description: 'Discover how ClassWeave is revolutionizing early childhood education with AI-powered personalized learning experiences, supporting educators and parents worldwide.',
+    images: [
+      {
+        url: '/og-about.png', // You can create this image later
+        width: 1200,
+        height: 630,
+        alt: 'ClassWeave About Page - AI-Powered Early Childhood Education Platform',
+      },
+    ],
+  },
+  alternates: {
+    canonical: 'https://classweave.vercel.app/about',
+  },
+  category: 'Education Technology',
+  classification: 'Educational Platform',
+};
 
 /**
  * AboutPage Component
  * 
  * Main about page component with comprehensive information about ClassWeave
+ * Server-side rendered for optimal SEO and performance
  * 
  * @returns {JSX.Element} Complete about page with mission, features, and SDG alignment
  */
-const AboutPage = () => {
-  const { user } = useUser();
-
+export default function AboutPage() {
   const sdgs = [
     {
       number: 4,
@@ -78,7 +132,7 @@ const AboutPage = () => {
     },
     {
       title: "Smart Story Creation",
-      description: "AI-generated personalized stories about daily activities that help children process experiences and learn new concepts.",
+      description: "AI-generated personalized stories for daycare educators to share daily activity observations with parents in an engaging, creative format that highlights each child's experiences and growth.",
       icon: "📖"
     },
     {
@@ -89,12 +143,12 @@ const AboutPage = () => {
     {
       title: "Non-Repetitive Content",
       description: "Advanced algorithms ensure every generated activity and story is unique, preventing repetition and maintaining engagement.",
-      icon: "�"
+      icon: "🔄"
     },
     {
       title: "Real-Time Analytics",
       description: "Monitor student development with detailed activity results, engagement metrics, and personalized recommendations.",
-      icon: "�"
+      icon: "📊"
     }
   ];
 
@@ -334,7 +388,7 @@ const AboutPage = () => {
             
             {/* Description */}
             <p className="text-emerald-700 leading-relaxed">
-              Geomatics student at the University of Waterloo and passionate full-stack developer specializing in AI engineering for early childhood education. I'm dedicated to creating innovative AI-powered tools that simplify daily challenges and empower educators and parents to focus on what matters most - nurturing young minds.
+              Geomatics student at the University of Waterloo and passionate full-stack developer specializing in AI engineering for early childhood education. I'm dedicated to creating innovative AI-powered tools that simplify daily challenges and empower educators and parents to focus on what matters most.
             </p>
             
             {/* Skills */}
@@ -347,49 +401,8 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Call to Action Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-emerald-700 to-emerald-800">
-        <div className="max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Transform Your Teaching?
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join educators worldwide who are already using ClassWeave to create personalized learning experiences
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {user ? (
-              <Link 
-                href="/students" 
-                className="bg-white text-emerald-800 px-8 py-4 rounded-lg font-semibold hover:bg-emerald-50 transition-colors transform hover:scale-105 shadow-lg"
-              >
-                Go to Your Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link 
-                  href="/register" 
-                  className="bg-white text-emerald-800 px-8 py-4 rounded-lg font-semibold hover:bg-emerald-50 transition-colors transform hover:scale-105 shadow-lg"
-                >
-                  Get Started Free
-                </Link>
-                <Link 
-                  href="/sample-students" 
-                  className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-emerald-800 transition-colors transform hover:scale-105"
-                >
-                  Try Demo
-                </Link>
-              </>
-            )}
-          </div>
-          
-          <p className="mt-6 text-sm opacity-75">
-            No credit card required • GDPR compliant • Start in minutes
-          </p>
-        </div>
-      </section>
+      {/* Call to Action Section - Client Component for Interactivity */}
+      <AboutCTA />
     </div>
   );
-};
-
-export default AboutPage;
+}
