@@ -199,6 +199,9 @@ const AddStudentPage = () => {
   const [tutorialStep, setTutorialStep] = useState(0);
   const [showTutorial, setShowTutorial] = useState(true);
   const [dontShowTutorial, setDontShowTutorial] = useState(false);
+  
+  // Modal state for non-logged-in users
+  const [showLoginModal, setShowLoginModal] = useState(false);
   // ========================================
   // TUTORIAL SYSTEM HANDLERS
   // ========================================
@@ -206,6 +209,7 @@ const AddStudentPage = () => {
   /**
    * Initialize tutorial preferences from localStorage
    * Checks if user has previously disabled the tutorial
+   * Also shows login modal for non-authenticated users
    */
   React.useEffect(() => {
     const hideAddStudentTutorial = localStorage.getItem('hideAddStudentTutorial') === 'true';
@@ -213,7 +217,26 @@ const AddStudentPage = () => {
     if (hideAddStudentTutorial) {
       setShowTutorial(false);
     }
-  }, []);
+    
+    // Show login modal for non-authenticated users
+    if (!user) {
+      setShowLoginModal(true);
+    }
+  }, [user]);
+
+  // Disable scrolling when modal is open
+  React.useEffect(() => {
+    if (showLoginModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    // Cleanup function to restore scrolling
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showLoginModal]);
 
   /**
    * Determines if a form field should be highlighted in tutorial mode
@@ -289,16 +312,58 @@ const AddStudentPage = () => {
       <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-emerald-700"></div>
     </div>
   );
-  return (    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-amber-50 py-12 relative">
-      {/* Tutorial Overlay - completely transparent */}
-      {showTutorial && (
-        <div className="fixed inset-0 bg-transparent z-30 pointer-events-none" />
-      )}
-      <div className="w-full max-w-2xl p-8 bg-white rounded-xl shadow-lg relative z-40 mx-4">
-        {/* Top padding before form */}
-        <div className="py-4" />
-        <form onSubmit={submitForm}>
-          <h2 className="text-3xl text-center font-bold text-emerald-800 mb-8">Add Toddler Activity Profile</h2>
+
+  /**
+   * LoginModal Component
+   * 
+   * Modal that appears for non-logged-in users with disclaimer about saving profiles
+   */
+  const LoginModal = () => (
+    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 mx-4 border border-gray-200">
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
+            <svg className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Login Required to Save</h3>
+          <p className="text-sm text-gray-600 mb-6">
+            You can explore and fill out the student profile form, but you'll need to log in to save your student profile permanently.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => router.push('/login')}
+              className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2 px-4 rounded-lg transition-colors cursor-pointer"
+            >
+              Log In Now
+            </button>
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors cursor-pointer"
+            >
+              Continue Anyway
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  return (
+    <>
+      {/* Login Modal for Non-Authenticated Users */}
+      {showLoginModal && <LoginModal />}
+      
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f8f6f2] to-[#f3e9db] py-12 relative">
+        {/* Tutorial Overlay - completely transparent */}
+        {showTutorial && (
+          <div className="fixed inset-0 bg-transparent z-30 pointer-events-none" />
+        )}
+        <div className="w-full max-w-2xl p-8 bg-white rounded-xl shadow-lg relative z-40 mx-4">
+          {/* Top padding before form */}
+          <div className="py-4" />
+          <form onSubmit={submitForm}>
+            <h2 className="text-3xl text-center font-bold text-emerald-800 mb-8">Add Toddler Activity Profile</h2>
 
           <div className={`mb-4 relative ${isSpotlight('name') ? 'ring-4 ring-emerald-400 z-50 bg-white p-2 rounded-lg' : ''}`}> {/* Name */}
             {isSpotlight('name') && showTutorial && <TutorialTooltip step={tutorialStep} />}
@@ -516,7 +581,7 @@ const AddStudentPage = () => {
       {/* Side floating buttons */}
       <div className="hidden md:flex flex-col gap-4 fixed bottom-8 right-8 z-20">
         <button
-          className="bg-white border border-emerald-300 text-emerald-700 px-4 py-2 rounded shadow hover:bg-emerald-50 font-semibold"
+          className="bg-white border border-emerald-300 text-emerald-700 px-4 py-2 rounded shadow hover:bg-emerald-50 font-semibold cursor-pointer"
           onClick={handleScrollToTop}
           type="button"
         >
@@ -524,7 +589,7 @@ const AddStudentPage = () => {
         </button>
         {showTutorial && (
           <button
-            className="bg-white border border-emerald-300 text-emerald-700 px-4 py-2 rounded shadow hover:bg-emerald-50 font-semibold"
+            className="bg-white border border-emerald-300 text-emerald-700 px-4 py-2 rounded shadow hover:bg-emerald-50 font-semibold cursor-pointer"
             onClick={handleDontShowTutorial}
           >
             Don&apos;t show tutorial again
@@ -532,6 +597,7 @@ const AddStudentPage = () => {
         )}
       </div>
     </div>
+    </>
   )
 }
 

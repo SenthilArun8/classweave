@@ -3,77 +3,57 @@
 		<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 	<loc>https://classweave.vercel.app/</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/students</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/add-student</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://classweave.vercel.app/at-home</loc>
-	<lastmod>2025-07-05T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/login</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/coming-soon</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/under-construction</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/privacy-policy</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/all-saved-activities</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/discarded-activities</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:43+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/register</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:45+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 <url>
 	<loc>https://classweave.vercel.app/forgot-password</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://classweave.vercel.app/sample-students</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://classweave.vercel.app/sample-story</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
-	<priority>1.0</priority>
-</url>
-<url>
-	<loc>https://classweave.vercel.app/sample-stories</loc>
-	<lastmod>2025-06-25T01:20:00-05:00</lastmod>
+	<lastmod>2025-06-25T02:31:45+01:00</lastmod>
 	<priority>1.0</priority>
 </url>
 </urlset>

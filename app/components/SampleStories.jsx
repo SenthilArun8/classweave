@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { FaTimes, FaCopy, FaFilePdf, FaShare } from 'react-icons/fa';
 import { jsPDF } from 'jspdf';
 import toast from 'react-hot-toast';
@@ -10,26 +9,23 @@ const featuredStories = [
   {
     id: 1,
     title: 'Emma\'s First Day',
-    excerpt: 'A heartwarming story about Emma\'s first day at daycare and how she made a new friend...',
     date: 'June 22, 2025',
     category: 'Individual Story',
-    fullContent: 'Emma walked into the classroom with wide eyes, clutching her favorite teddy bear. At first, she stayed close to the door, watching the other children play. Then, she noticed Sarah building with blocks. "Can I help?" Emma asked softly. Sarah smiled and nodded. Together, they built the tallest tower the class had ever seen! By snack time, Emma was laughing and sharing her animal crackers with her new friend. At pickup, Emma couldn\'t wait to tell her parents about her wonderful first day.'
+    content: 'Emma walked into the classroom with wide eyes, clutching her favorite teddy bear. At first, she stayed close to the door, watching the other children play. Then, she noticed Sarah building with blocks. "Can I help?" Emma asked softly. Sarah smiled and nodded. Together, they built the tallest tower the class had ever seen! By snack time, Emma was laughing and sharing her animal crackers with her new friend. At pickup, Emma couldn\'t wait to tell her parents about her wonderful first day.'
   },
   {
     id: 2,
     title: 'Liam\'s Big Discovery',
-    excerpt: 'Liam discovers the joy of reading with his favorite book about dinosaurs...',
     date: 'June 21, 2025',
     category: 'Individual Story',
-    fullContent: 'Liam has always been fascinated by dinosaurs, but today was special. During story time, Miss Anna read "The Dinosaur Who Lost Its Roar" - Liam\'s favorite book. His eyes lit up as he recognized the pictures. "That\'s a T-Rex!" he exclaimed, pointing excitedly. After the story, Liam spent the afternoon at the reading corner, carefully turning the pages and making up his own stories about the dinosaurs. He even helped his friend Mia sound out some of the words. It was a day of big discoveries and growing confidence for our little paleontologist!'
+    content: 'Liam has always been fascinated by dinosaurs, but today was special. During story time, Miss Anna read "The Dinosaur Who Lost Its Roar" - Liam\'s favorite book. His eyes lit up as he recognized the pictures. "That\'s a T-Rex!" he exclaimed, pointing excitedly. After the story, Liam spent the afternoon at the reading corner, carefully turning the pages and making up his own stories about the dinosaurs. He even helped his friend Mia sound out some of the words. It was a day of big discoveries and growing confidence for our little paleontologist!'
   },
   {
     id: 3,
     title: 'Our Class Garden Adventure',
-    excerpt: 'The whole class works together to plant a beautiful flower garden...',
     date: 'June 20, 2025',
     category: 'Class Story',
-    fullContent: 'Today, our class transformed into a team of gardeners! Each child was given their own small pot, soil, and flower seeds. We learned how to carefully plant the seeds and give them just the right amount of water. The children worked together to create a watering schedule and take turns caring for our new garden. Even though we got a little dirty, the laughter and excitement made it all worthwhile. We can\'t wait to watch our flowers grow together! This project taught us about responsibility, teamwork, and the magic of nature.'
+    content: 'Today, our class transformed into a team of gardeners! Each child was given their own small pot, soil, and flower seeds. We learned how to carefully plant the seeds and give them just the right amount of water. The children worked together to create a watering schedule and take turns caring for our new garden. Even though we got a little dirty, the laughter and excitement made it all worthwhile. We can\'t wait to watch our flowers grow together! This project taught us about responsibility, teamwork, and the magic of nature.'
   },
 ];
 
@@ -40,7 +36,7 @@ const SampleStories = () => {
   const [generatedStory, setGeneratedStory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const router = useRouter();
+  const [discardedStories, setDiscardedStories] = useState([]);
 
   const handleInteraction = () => {
     setIsPaused(true);
@@ -58,23 +54,20 @@ const SampleStories = () => {
     try {
       const response = await fetch('/api/ai/generate-story', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           studentName: 'your child',
-          age: 36, // Default age for non-logged-in users
+          age: 36,
           context: storyContext.trim(),
           interests: [],
           personality: 'curious and creative',
-          isSampleStory: true // Flag to indicate this is a sample story request
+          isSampleStory: true,
+          discardedStories: discardedStories
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate story');
-      }
+      if (!response.ok) throw new Error('Failed to generate story');
 
       const data = await response.json();
       setGeneratedStory({
@@ -82,7 +75,6 @@ const SampleStories = () => {
         context: storyContext.trim(),
         generatedAt: new Date().toISOString()
       });
-      // Don't close the modal - keep it open to show the generated story
     } catch (error) {
       console.error('Error generating story:', error);
       toast.error('Failed to generate story. Please try again.');
@@ -93,24 +85,17 @@ const SampleStories = () => {
 
   const handleDownloadPDF = () => {
     if (!generatedStory) return;
-    
     const doc = new jsPDF();
     const title = generatedStory.title || 'Generated Story';
-    const content = generatedStory.content || '';
-    
     doc.setFontSize(20);
     doc.text(title, 15, 20);
-    
     doc.setFontSize(12);
-    const splitText = doc.splitTextToSize(content, 180);
-    doc.text(splitText, 15, 40);
-    
+    doc.text(doc.splitTextToSize(generatedStory.content || '', 180), 15, 40);
     doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
   };
 
   const handleShare = async () => {
     if (!generatedStory) return;
-    
     const shareData = {
       title: generatedStory.title || 'Generated Story',
       text: generatedStory.content,
@@ -121,45 +106,51 @@ const SampleStories = () => {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        // Fallback for browsers that don't support Web Share API
         await navigator.clipboard.writeText(
-          `${generatedStory.title || 'Generated Story'}\n\n${generatedStory.content}\n\nShared from ${window.location.href}`
+          `${shareData.title}\n\n${shareData.text}\n\nShared from ${shareData.url}`
         );
         toast.success('Story link copied to clipboard!');
       }
     } catch (err) {
-      console.error('Error sharing:', err);
-      // If sharing was cancelled, don't show an error
       if (err.name !== 'AbortError') {
-        toast.error('Could not share the story. Please try again or copy it manually.');
+        toast.error('Could not share the story. Please try again.');
       }
     }
   };
 
   const handleCopyToClipboard = async () => {
     if (!generatedStory) return;
-    
     try {
       await navigator.clipboard.writeText(
         `${generatedStory.title || 'Generated Story'}\n\n${generatedStory.content}`
       );
       toast.success('Story copied to clipboard!');
     } catch (err) {
-      console.error('Failed to copy:', err);
       toast.error('Failed to copy story to clipboard');
     }
   };
 
+  const handleDiscardStory = () => {
+    if (!generatedStory) return;
+    
+    // Add the story title to discarded stories list
+    setDiscardedStories(prev => [...prev, generatedStory.title]);
+    
+    // Clear the current story
+    setGeneratedStory(null);
+    
+    toast.success('Story discarded. Next generation will avoid similar stories.');
+  };
+
   // Auto-rotate stories every 5 seconds
   useEffect(() => {
-    if (!isPaused && !showStoryModal) {
-      const interval = setInterval(() => {
-        setCurrentStoryIndex((prevIndex) => 
-          prevIndex === featuredStories.length - 1 ? 0 : prevIndex + 1
-        );
-      }, 5000);
-      return () => clearInterval(interval);
-    }
+    if (isPaused || showStoryModal) return;
+    const interval = setInterval(() => {
+      setCurrentStoryIndex((prevIndex) => 
+        prevIndex === featuredStories.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000);
+    return () => clearInterval(interval);
   }, [isPaused, showStoryModal]);
 
   return (
@@ -168,7 +159,7 @@ const SampleStories = () => {
         <div className="flex flex-col items-end mb-8 space-y-2">
           <button
             onClick={() => setShowStoryModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#294122] hover:bg-[#1a2e16] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#294122] transition-colors"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#294122] hover:bg-[#1a2e16] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#294122] transition-colors cursor-pointer"
           >
             <svg className="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -227,7 +218,7 @@ const SampleStories = () => {
                         {story.title}
                       </h3>
                       <div className="mt-4 mb-6">
-                        <p className="text-gray-700 text-base">{story.fullContent}</p>
+                        <p className="text-gray-700 text-base">{story.content}</p>
                       </div>
                       <div className="mt-auto pt-4 border-t border-gray-100">
                         <p className="text-sm text-gray-500">{story.date}</p>
@@ -249,11 +240,8 @@ const SampleStories = () => {
                   setCurrentStoryIndex(index);
                 }}
                 onMouseEnter={() => setIsPaused(true)}
-                onMouseLeave={() => {
-                  const timer = setTimeout(() => setIsPaused(false), 1000);
-                  return () => clearTimeout(timer);
-                }}
-                className={`h-2.5 rounded-full transition-all ${index === currentStoryIndex ? 'bg-[#294122] w-8' : 'bg-gray-300 w-2.5'}`}
+                onMouseLeave={() => setIsPaused(false)}
+                className={`h-2.5 rounded-full transition-all cursor-pointer ${index === currentStoryIndex ? 'bg-[#294122] w-8' : 'bg-gray-300 w-2.5'}`}
                 aria-label={`Go to story ${index + 1}`}
               />
             ))}
@@ -265,7 +253,7 @@ const SampleStories = () => {
               handleInteraction();
               setCurrentStoryIndex(prev => (prev - 1 + featuredStories.length) % featuredStories.length);
             }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#294122] rounded-full p-3 shadow-xl z-10"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#294122] rounded-full p-3 shadow-xl z-10 cursor-pointer"
             aria-label="Previous story"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,7 +265,7 @@ const SampleStories = () => {
               handleInteraction();
               setCurrentStoryIndex(prev => (prev + 1) % featuredStories.length);
             }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#294122] rounded-full p-3 shadow-xl z-10"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#294122] rounded-full p-3 shadow-xl z-10 cursor-pointer"
             aria-label="Next story"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,7 +283,7 @@ const SampleStories = () => {
               <h3 className="text-xl font-semibold text-gray-800">Create a Story</h3>
               <button 
                 onClick={() => setShowStoryModal(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 cursor-pointer"
                 disabled={loading}
               >
                 <FaTimes className="w-5 h-5" />
@@ -328,14 +316,14 @@ const SampleStories = () => {
                     type="button"
                     onClick={() => setShowStoryModal(false)}
                     disabled={loading}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loading || !storyContext.trim()}
-                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 cursor-pointer"
                   >
                     {loading ? 'Generating...' : 'Generate Story'}
                   </button>
@@ -346,32 +334,19 @@ const SampleStories = () => {
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-xl font-semibold">{generatedStory.title || 'Your Generated Story'}</h3>
                   <div className="flex space-x-2">
-                    <button
-                      onClick={handleCopyToClipboard}
-                      className="p-2 text-gray-600 hover:text-gray-900"
-                      title="Copy to clipboard"
-                    >
+                    <button onClick={handleCopyToClipboard} className="p-2 text-gray-600 hover:text-gray-900 cursor-pointer" title="Copy to clipboard">
                       <FaCopy className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={handleShare}
-                      className="p-2 text-gray-600 hover:text-gray-900"
-                      title="Share story"
-                    >
+                    <button onClick={handleDiscardStory} className="p-2 text-orange-600 hover:text-orange-900 cursor-pointer" title="Discard story (won't be generated again)">
+                      <FaTimes className="w-4 h-4" />
+                    </button>
+                    <button onClick={handleShare} className="p-2 text-gray-600 hover:text-gray-900 cursor-pointer" title="Share story">
                       <FaShare className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={handleDownloadPDF}
-                      className="p-2 text-gray-600 hover:text-gray-900"
-                      title="Download as PDF"
-                    >
+                    <button onClick={handleDownloadPDF} className="p-2 text-gray-600 hover:text-gray-900 cursor-pointer" title="Download as PDF">
                       <FaFilePdf className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => setGeneratedStory(null)}
-                      className="p-2 text-gray-600 hover:text-gray-900"
-                      title="Close"
-                    >
+                    <button onClick={() => setGeneratedStory(null)} className="p-2 text-gray-600 hover:text-gray-900 cursor-pointer" title="Close">
                       <FaTimes className="w-4 h-4" />
                     </button>
                   </div>
@@ -381,15 +356,13 @@ const SampleStories = () => {
                 </div>
                 
                 <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                  <p className="text-xs text-gray-400">
-                    Login to create even more personalized stories!
-                  </p>
+                  <p className="text-xs text-gray-400">Login to create even more personalized stories!</p>
                   <button
                     onClick={() => {
                       setGeneratedStory(null);
                       setStoryContext('');
                     }}
-                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 cursor-pointer"
                   >
                     Create Another Story
                   </button>

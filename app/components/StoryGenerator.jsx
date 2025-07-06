@@ -37,6 +37,7 @@ const StoryGenerator = ({ student }) => {
   const [story, setStory] = useState(/** @type {Story | null} */ (null));
   const [lastInput, setLastInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [discardedStories, setDiscardedStories] = useState(/** @type {string[]} */ ([]));
   const { token } = useUser();
 
   // Handlers
@@ -82,7 +83,8 @@ const StoryGenerator = ({ student }) => {
           age: student.age_months,
           context: trimmedContext,
           interests: student.interests || [],
-          personality: student.personality || {}
+          personality: student.personality || {},
+          discardedStories: discardedStories
         })
       });
 
@@ -162,7 +164,8 @@ const StoryGenerator = ({ student }) => {
           age: student.age_months,
           context: lastInput,
           interests: student.interests || [],
-          personality: student.personality || {}
+          personality: student.personality || {},
+          discardedStories: discardedStories
         })
       });
 
@@ -246,6 +249,21 @@ const StoryGenerator = ({ student }) => {
         console.error('Error sharing story:', error);
       }
     }
+  };
+
+  /**
+   * Discard the current story and track it to avoid repetition
+   */
+  const handleDiscardStory = () => {
+    if (!story) return;
+    
+    // Add the story title to discarded stories list
+    setDiscardedStories(prev => [...prev, story.title]);
+    
+    // Clear the current story
+    setStory(null);
+    
+    toast.success('Story discarded. Next generation will avoid similar stories.');
   };
 
   return (
@@ -357,6 +375,16 @@ const StoryGenerator = ({ student }) => {
               title="Generate a new story with the same context"
             >
               Regenerate Story
+            </button>
+            
+            {/* Discard Story Button */}
+            <button
+              onClick={handleDiscardStory}
+              disabled={loading}
+              className="text-sm bg-orange-100 hover:bg-orange-200 text-orange-800 px-3 py-1 rounded flex items-center gap-1 disabled:opacity-50"
+              title="Discard this story (won't be generated again)"
+            >
+              Discard Story
             </button>
             
             {/* Download as PDF Button */}

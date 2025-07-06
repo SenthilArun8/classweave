@@ -2,7 +2,7 @@ import { getAiInstance } from '@/lib/config/googleAuth';
 
 // Story generation prompt template
 const storyPromptTemplate = (student, context) => `
-You are an expert story writer at a daycare specializing in creating engaging, age-appropriate stories for the parents and guardians of children and toddlers.
+You are an expert children's story writer specializing in creating engaging, age-appropriate stories for young children.
 
 Create a personalized story based on the following details:
 
@@ -12,13 +12,13 @@ Context/Scenario: ${context}
 
 Story Requirements:
 1. The story should be engaging and appropriate for a the parents of the child.
-2. Incorporate the provided context as the main theme of the story.
-3. Keep the story positive, educational, fun and a means to convey the activity to the parent.
+2. Follow the provided context as the main theme of the story.
+3. Keep the story positive, educational, and fun.
 4. The story should be between 100-200 words.
 5. Include a clear beginning, middle, and end.
 6. Be creative in your story but do not digress from the main context too much
 7. The purpose of this story is to create a post for the parent for the child to view about what activity their child had done that day in a creative, engaging, and professional manner. 
-8. DO NOT create characters and stay as true to the facts as possible
+8. DO NOT create characters
 
 Format the response as a JSON object with the following structure:
 {
@@ -36,13 +36,13 @@ Context/Scenario: ${context}
 
 Story Requirements:
 1. The story should be engaging and appropriate for a the parents of the child.
-2. Incorporate the provided context as the main theme of the story.
+2. Follow the provided context as the main theme of the story.
 3. Keep the story positive, educational, fun and a means to convey the activity to the parent.
 4. The story should be between 100-200 words.
 5. Include a clear beginning, middle, and end.
 6. Be creative in your story but do not digress from the main context too much
 7. The purpose of this story is to create a post for the parent for the child to view about what activity their child had done that day in a creative, engaging, and professional manner. 
-8. DO NOT create characters and stay as true to the facts as possible
+8. DO NOT create characters
 
 Format the response as a JSON object with the following structure:
 {

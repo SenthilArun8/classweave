@@ -133,12 +133,17 @@ const Navbar = () => {
                 </li>
                 <li>
                   <Link href="/students" className={linkClass('/students')}>
-                    Your Students
+                    {user ? 'Your Students' : 'Sample Students'}
                   </Link>
                 </li>
                 <li>
                   <Link href="/add-student" className={linkClass('/add-student')}>
                     Add Student
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/at-home" className={linkClass('/at-home')}>
+                    At Home
                   </Link>
                 </li>
                 <li className="relative">
@@ -155,13 +160,13 @@ const Navbar = () => {
                           href="/all-saved-activities"
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                         >
-                          Saved Activities
+                          {user ? 'Saved Activities' : 'Sample Saved Activities'}
                         </Link>
                         <Link
                           href="/discarded-activities"
                           className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                         >
-                          Discarded Activities
+                          {user ? 'Discarded Activities' : 'Sample Discarded Activities'}
                         </Link>
                       </div>
                     </PopoverPanel>
@@ -228,7 +233,7 @@ const Navbar = () => {
                     className={linkClass('/students')}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Your Students
+                    {user ? 'Your Students' : 'Sample Students'}
                   </Link>
                 </li>
                 <li>
@@ -240,8 +245,19 @@ const Navbar = () => {
                     Add Student
                   </Link>
                 </li>
+                <li>
+                  <Link 
+                    href="/at-home" 
+                    className={linkClass('/at-home')}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    At Home
+                  </Link>
+                </li>
                 <li className="pt-2">
-                  <div className="pl-3 text-[#FFEDD2] font-semibold">Saved Activities</div>
+                  <div className="pl-3 text-[#FFEDD2] font-semibold">
+                    {user ? 'Saved Activities' : 'Sample Activities'}
+                  </div>
                   {studentsLoading ? (
                     <div className="pl-6 text-sm text-[#FFEDD2]">Loading students...</div>
                   ) : (user && students.length === 0) ? (
@@ -257,7 +273,7 @@ const Navbar = () => {
                             className="block pl-6 w-full text-left text-[#FFEDD2] hover:bg-[#FFBBA6] hover:text-[#294122] py-2 text-sm rounded"
                             onClick={() => setIsMobileMenuOpen(false)}
                           >
-                            {student.name}
+                            {student.name} {!user && '(Sample)'}
                           </Link>
                         </li>
                       ))}

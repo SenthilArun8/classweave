@@ -76,7 +76,7 @@ const StudentDiscardedActivitiesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f0e6] py-10 px-4 flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8f6f2] to-[#f3e9db] py-10 px-4 flex flex-col items-center">
       <div className="w-full max-w-4xl bg-white/80 rounded-xl shadow-lg p-8">
         <h2 className="text-3xl font-bold text-emerald-800 mb-6 text-center">
           Discarded Activities for {studentName}
@@ -90,11 +90,14 @@ const StudentDiscardedActivitiesPage = () => {
           </Link>
         </div>
         {loading ? (
-          <div className="text-center text-emerald-700">Loading...</div>
+          <div className="text-center text-emerald-700 py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700 mx-auto mb-4"></div>
+            Loading...
+          </div>
         ) : error ? (
-          <div className="text-center text-red-600">{error}</div>
+          <div className="text-center text-red-600 py-8">{error}</div>
         ) : activities.length === 0 ? (
-          <div className="text-center text-emerald-700">No discarded activities found.</div>
+          <div className="text-center text-emerald-700 py-8">No discarded activities found.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {activities.map((activity, idx) => (

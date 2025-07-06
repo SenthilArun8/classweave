@@ -163,12 +163,21 @@ const SavedActivityPage = () => {
     ? savedActivities.filter(a => normalizeSkills(a.skills_supported).some(s => s.category === categoryFilter))
     : savedActivities;
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
-  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-gradient-to-br from-[#f8f6f2] to-[#f3e9db] py-8">
+      <div className="p-8 text-center">Loading...</div>
+    </div>
+  );
+  if (error) return (
+    <div className="min-h-screen bg-gradient-to-br from-[#f8f6f2] to-[#f3e9db] py-8">
+      <div className="p-8 text-center text-red-600">{error}</div>
+    </div>
+  );
   if (!student) return null;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow mt-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8f6f2] to-[#f3e9db] py-8">
+      <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow mt-8">
       <h2 className="text-2xl font-bold mb-4 text-emerald-800">Saved Activities for {student.name}</h2>
       <div className="mb-4 flex flex-wrap gap-2 items-center justify-end">
         <label className="font-semibold text-emerald-900 mr-2">Filter by Category:</label>
@@ -287,6 +296,7 @@ const SavedActivityPage = () => {
           </svg>
         </button>
       )}
+      </div>
     </div>
   );
 };

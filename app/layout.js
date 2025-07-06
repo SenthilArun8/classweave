@@ -71,19 +71,19 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
         ></script>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen flex flex-col`} suppressHydrationWarning={true}>
         {/* Google Analytics with Consent Mode - Moved to body to prevent hydration issues */}
         <Script id="google-analytics-init" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             
-            // Set default consent mode
+            // Set default consent mode - Analytics and ads are now essential
             gtag('consent', 'default', {
-              'analytics_storage': 'denied',
-              'ad_storage': 'denied',
-              'ad_user_data': 'denied',
-              'ad_personalization': 'denied',
+              'analytics_storage': 'granted',
+              'ad_storage': 'granted',
+              'ad_user_data': 'granted',
+              'ad_personalization': 'granted',
               'wait_for_update': 500,
             });
             
@@ -94,7 +94,9 @@ export default function RootLayout({ children }) {
 
         <UserProvider>
           <Navbar />
-          {children}
+          <main className="flex-1">
+            {children}
+          </main>
           <ClientOnly>
             <CookieConsent />
             <ConsentSettings />

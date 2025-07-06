@@ -79,7 +79,7 @@ const Footer = () => {
                 </li>
                 <li className="mb-2">
                   <Link 
-                    href="/under-construction" 
+                    href="/about" 
                     className="hover:text-[#FFBBA6] transition-colors duration-200 block"
                     aria-label="Learn about ClassWeave"
                   >
