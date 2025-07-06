@@ -1,696 +1,321 @@
 /**
  * At Home Activities Page Component
  * 
- * Allows parents to generate personalized activities for their children to do at home.
- * Includes a comprehensive form to collect child information and generates activities
- * via AI based on the provided details.
+ * Server-side rendered page for generating personalized activities for children at home.
+ * Includes comprehensive SEO metadata and structured content for better search visibility.
  * 
  * FEATURES:
- * - Child information form (age, interests, developmental stage, etc.)
- * - AI-powered activity generation
- * - Activity display with instructions and materials needed
- * - Save/download functionality for generated activities
- * - Responsive design with consistent styling
+ * - Server-side rendering for optimal SEO
+ * - Comprehensive metadata for social sharing
+ * - AI-powered activity generation via client component
+ * - Mobile-responsive design
+ * - Rich structured data for search engines
  */
 
-'use client';
+import React from 'react';
+import Script from 'next/script';
+import AtHomeActivityGenerator from '@/app/components/AtHomeActivityGenerator';
 
-import React, { useState } from 'react';
-import { useUser } from '@/contexts/UserContext';
-import Card from '@/app/components/Card';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faCheck } from '@fortawesome/free-solid-svg-icons';
+// Comprehensive metadata for SEO and social sharing
+export const metadata = {
+  title: 'At-Home Activities Generator | AI-Powered Educational Activities for Kids',
+  description: 'Generate personalized educational activities for your children at home using AI. Perfect for parents, homeschoolers, and caregivers. Create engaging indoor and outdoor activities tailored to your child\'s age, interests, and developmental needs.',
+  keywords: [
+    'at-home activities for kids',
+    'educational activities children',
+    'home learning activities',
+    'AI activity generator',
+    'personalized kids activities',
+    'indoor activities for children',
+    'outdoor activities for kids',
+    'preschool activities at home',
+    'toddler activities',
+    'homeschool activities',
+    'educational games children',
+    'learning activities home',
+    'child development activities',
+    'play-based learning',
+    'parent child activities',
+    'kids crafts and activities',
+    'STEM activities kids',
+    'creative activities children',
+    'fine motor activities',
+    'gross motor activities',
+    'cognitive development activities',
+    
+  ],
+  authors: [{ name: 'ClassWeave', url: 'https://classweave.vercel.app' }],
+  creator: 'ClassWeave',
+  publisher: 'ClassWeave',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://classweave.vercel.app/at-home',
+    siteName: 'ClassWeave',
+    title: 'AI-Powered At-Home Activities for Kids | ClassWeave',
+    description: 'Generate unlimited personalized educational activities for your children at home. AI-powered generator creates age-appropriate activities based on your child\'s interests, developmental stage, and available materials.',
+    images: [
+      {
+        url: '/og-at-home.png', // You can create this image later
+        width: 1200,
+        height: 630,
+        alt: 'ClassWeave At-Home Activities Generator - AI-Powered Educational Activities for Children',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI-Powered At-Home Activities for Kids | ClassWeave',
+    description: 'Generate personalized educational activities for your children at home using AI. Perfect for busy parents and homeschoolers.',
+    images: ['/og-at-home.png'], // You can create this image later
+    creator: '@classweave', // Replace with actual Twitter handle if you have one
+  },
+  alternates: {
+    canonical: 'https://classweave.vercel.app/at-home',
+  },
+  category: 'Education',
+  classification: 'Educational Tools',
+  applicationName: 'ClassWeave',
+  referrer: 'origin-when-cross-origin',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  verification: {
+    // Add your verification codes here if you have them
+    // google: 'your-google-verification-code',
+    // bing: 'your-bing-verification-code',
+  },
+  other: {
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
+    'apple-mobile-web-app-title': 'ClassWeave At-Home',
+    'mobile-web-app-capable': 'yes',
+  },
+};
 
 /**
  * AtHomePage Component
  * 
- * Main component for generating at-home activities for children
+ * Main server component for the at-home activities page
+ * Provides SEO-optimized structure and includes client component for interactivity
  * 
- * @returns {JSX.Element} Complete at-home activities page with form and results
+ * @returns {JSX.Element} Complete at-home activities page
  */
-const AtHomePage = () => {
-  const { user } = useUser();
-  const [formData, setFormData] = useState({
-    age: '',
-    interests: '',
-    personality: '',
-    developmentalStage: '',
-    availableTime: '',
-    availableMaterials: '',
-    learningGoals: '',
-    activityType: '',
-    activityLocation: '',
-    desiredActivityLength: '',
-    numberOfChildren: '',
-    childDislikes: ''
-  });
-  const [parentInvolved, setParentInvolved] = useState(false);
-  const [showAdditional, setShowAdditional] = useState(false);
-  const [generatedActivity, setGeneratedActivity] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState('');
-  const [showLearningOutcomes, setShowLearningOutcomes] = useState(false);
-  const [showTips, setShowTips] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-  const [discardedActivities, setDiscardedActivities] = useState([]);
-
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Generate activity based on form data
-  const generateActivity = async (e) => {
-    e.preventDefault();
-    setIsGenerating(true);
-    setError('');
-    
-    try {
-      const response = await fetch('/api/ai/generateHomeActivity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          discardedActivities
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate activity');
-      }
-
-      const data = await response.json();
-      setGeneratedActivity(data.activity);
-    } catch (error) {
-      console.error('Error generating activity:', error);
-      setError('Failed to generate activity. Please try again.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  // Reset form and generated activity
-  const resetForm = () => {
-    setFormData({
-      age: '',
-      interests: '',
-      personality: '',
-      developmentalStage: '',
-      availableTime: '',
-      availableMaterials: '',
-      learningGoals: '',
-      activityType: '',
-      activityLocation: '',
-      desiredActivityLength: '',
-      numberOfChildren: '',
-      childDislikes: ''
-    });
-    setParentInvolved(false);
-    setShowAdditional(false);
-    setGeneratedActivity(null);
-    setError('');
-    setDiscardedActivities([]);
-  };
-
-  // Copy activity to clipboard
-  const copyActivityToClipboard = async () => {
-    if (!generatedActivity) return;
-
-    try {
-      const activityText = `
-${generatedActivity.title}
-
-${generatedActivity.description}
-
-Materials Needed:
-${generatedActivity.materials ? generatedActivity.materials.map(material => `• ${material}`).join('\n') : 'No specific materials listed'}
-
-Instructions:
-${generatedActivity.instructions ? generatedActivity.instructions.map((instruction, index) => `${index + 1}. ${instruction}`).join('\n') : 'No instructions provided'}
-
-Learning Outcomes:
-${generatedActivity.learningOutcomes ? generatedActivity.learningOutcomes.map(outcome => `• ${outcome}`).join('\n') : 'No learning outcomes listed'}
-
-Tips for Parents:
-${generatedActivity.tips ? generatedActivity.tips.map(tip => `• ${tip}`).join('\n') : 'No tips provided'}
-
-Generated on: ${new Date().toLocaleDateString()}
-      `.trim();
-
-      await navigator.clipboard.writeText(activityText);
-      setIsCopied(true);
-      
-      // Reset the copied state after 2 seconds
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 2000);
-    } catch (error) {
-      console.error('Failed to copy activity:', error);
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = activityText;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    }
-  };
-
-  // Discard current activity and generate a new one
-  const discardActivity = () => {
-    if (generatedActivity) {
-      setDiscardedActivities(prev => [...prev, {
-        title: generatedActivity.title,
-        description: generatedActivity.description
-      }]);
-      generateActivity(new Event('submit'));
-    }
-  };
-
+export default function AtHomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8f6f2] to-[#f3e9db]">
-      {/* Hero Section */}
-      <section className="relative py-12 md:py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-800 mb-4 md:mb-6">
-            At-Home Activities
-          </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-emerald-700 mb-6 md:mb-8 leading-relaxed px-2">
-            Generate personalized educational activities for your child to enjoy at home
-          </p>
-          <div className="w-16 md:w-24 h-1 bg-emerald-600 mx-auto"></div>
-        </div>
-      </section>
+    <>
+      {/* Structured Data for At-Home Activities */}
+      <Script id="at-home-structured-data" type="application/ld+json" strategy="beforeInteractive">
+        {`
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "At-Home Activities Generator",
+            "description": "AI-powered generator for personalized educational activities for children at home",
+            "url": "https://classweave.vercel.app/at-home",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "ClassWeave",
+              "url": "https://classweave.vercel.app"
+            },
+            "mainEntity": {
+              "@type": "SoftwareApplication",
+              "name": "At-Home Activity Generator",
+              "applicationCategory": "EducationalApplication",
+              "description": "Generate personalized educational activities for children using AI based on age, interests, and available materials",
+              "operatingSystem": "Web",
+              "isAccessibleForFree": true,
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "featureList": [
+                "Personalized activity generation",
+                "Age-appropriate content",
+                "Uses common household materials",
+                "Indoor and outdoor activities",
+                "Learning outcomes tracking",
+                "Parent involvement options"
+              ],
+              "audience": {
+                "@type": "EducationalAudience",
+                "educationalRole": ["parent", "caregiver", "homeschooler"]
+              }
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://classweave.vercel.app"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "At-Home Activities",
+                  "item": "https://classweave.vercel.app/at-home"
+                }
+              ]
+            }
+          }
+        `}
+      </Script>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-16">
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Form Section */}
-          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
-            <h2 className="text-xl md:text-2xl font-bold text-emerald-800 mb-4 md:mb-6">
-              Tell Us About Your Child
+      <div className="min-h-screen bg-gradient-to-br from-[#f8f6f2] to-[#f3e9db]">
+        {/* SEO-Optimized Hero Section */}
+        <section className="relative py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-800 mb-4 md:mb-6">
+              At-Home Activities Generator
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl text-emerald-700 mb-4 md:mb-6 leading-relaxed px-2">
+              Create personalized educational activities for your child using AI
+            </p>
+            <p className="text-base sm:text-lg text-emerald-600 mb-6 md:mb-8 leading-relaxed px-2 max-w-3xl mx-auto">
+              Perfect for busy parents, homeschoolers, and caregivers. Generate age-appropriate activities based on your child's interests, developmental stage, and available materials at home.
+            </p>
+            <div className="w-16 md:w-24 h-1 bg-emerald-600 mx-auto"></div>
+          </div>
+        </section>
+
+        {/* Benefits Section for SEO */}
+        <section className="py-8 px-4 sm:px-6 lg:px-8 bg-white/50">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-6 text-center">
+              <div className="p-4">
+                <div className="text-3xl mb-3">🎯</div>
+                <h3 className="font-semibold text-emerald-800 mb-2">Personalized Activities</h3>
+                <p className="text-emerald-700 text-sm">
+                  AI-generated activities tailored to your child's age, interests, and developmental needs
+                </p>
+              </div>
+              <div className="p-4">
+                <div className="text-3xl mb-3">🏠</div>
+                <h3 className="font-semibold text-emerald-800 mb-2">Using Home Materials</h3>
+                <p className="text-emerald-700 text-sm">
+                  Activities designed with common household items - no need for expensive supplies
+                </p>
+              </div>
+              <div className="p-4">
+                <div className="text-3xl mb-3">⚡</div>
+                <h3 className="font-semibold text-emerald-800 mb-2">Instant Generation</h3>
+                <p className="text-emerald-700 text-sm">
+                  Generate unlimited unique activities in seconds with our AI-powered system
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Interactive Activity Generator - Client Component */}
+        <AtHomeActivityGenerator />
+
+        {/* Additional SEO Content */}
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-emerald-800 mb-6 text-center">
+              Why Choose Our At-Home Activity Generator?
             </h2>
             
-            <form onSubmit={generateActivity} className="space-y-4 md:space-y-6">
-              {/* Age */}
+            <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <label htmlFor="age" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                  Child's Age
-                </label>
-                <select
-                  id="age"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                  required
-                >
-                  <option value="">Select age</option>
-                  <option value="2-3 years">2-3 years</option>
-                  <option value="3-4 years">3-4 years</option>
-                  <option value="4-5 years">4-5 years</option>
-                  <option value="5-6 years">5-6 years</option>
-                  <option value="6-7 years">6-7 years</option>
-                </select>
-              </div>
-
-              {/* Activity Location */}
-              <div>
-                <label htmlFor="activityLocation" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                  Activity Location
-                </label>
-                <select
-                  id="activityLocation"
-                  name="activityLocation"
-                  value={formData.activityLocation}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                  required
-                >
-                  <option value="">Select location</option>
-                  <option value="indoor">Indoor</option>
-                  <option value="outdoor">Outdoor</option>
-                  <option value="both">Indoor & Outdoor</option>
-                </select>
-              </div>
-
-              {/* Desired Activity Length */}
-              <div>
-                <label htmlFor="desiredActivityLength" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                  Desired Activity Length
-                </label>
-                <select
-                  id="desiredActivityLength"
-                  name="desiredActivityLength"
-                  value={formData.desiredActivityLength}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                  required
-                >
-                  <option value="">Select duration</option>
-                  <option value="10-20 minutes">10-20 minutes</option>
-                  <option value="20-30 minutes">20-30 minutes</option>
-                  <option value="30-45 minutes">30-45 minutes</option>
-                  <option value="45-60 minutes">45-60 minutes</option>
-                  <option value="1+ hours">1+ hours</option>
-                </select>
-              </div>
-
-              {/* Number of Children */}
-              <div>
-                <label htmlFor="numberOfChildren" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                  Number of Children for Activity
-                </label>
-                <select
-                  id="numberOfChildren"
-                  name="numberOfChildren"
-                  value={formData.numberOfChildren}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                  required
-                >
-                  <option value="">Select number</option>
-                  <option value="1">1 child (solo activity)</option>
-                  <option value="2">2 children</option>
-                  <option value="3-4">3-4 children</option>
-                  <option value="5+">5+ children (group activity)</option>
-                </select>
-              </div>
-
-              {/* Parent Involvement Checkbox */}
-              <div>
-                <label className="flex items-start md:items-center">
-                  <input
-                    type="checkbox"
-                    checked={parentInvolved}
-                    onChange={(e) => setParentInvolved(e.target.checked)}
-                    className="mt-1 md:mt-0 mr-3 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-emerald-300 rounded flex-shrink-0"
-                  />
-                  <span className="text-sm font-medium text-emerald-700 leading-snug">
-                    Parent-involved activities (requires supervision/participation)
-                  </span>
-                </label>
-              </div>
-
-              {/* Available Time - Only show if parent involved is checked */}
-              {parentInvolved && (
-                <div>
-                  <label htmlFor="availableTime" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                    Available Time for Activity
-                  </label>
-                  <select
-                    id="availableTime"
-                    name="availableTime"
-                    value={formData.availableTime}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                    required={parentInvolved}
-                  >
-                    <option value="">Select duration</option>
-                    <option value="15-30 minutes">15-30 minutes</option>
-                    <option value="30-45 minutes">30-45 minutes</option>
-                    <option value="45-60 minutes">45-60 minutes</option>
-                    <option value="1+ hours">1+ hours</option>
-                  </select>
-                </div>
-              )}
-
-              {/* Activity Type */}
-              <div>
-                <label htmlFor="activityType" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                  Activity Type Preference
-                </label>
-                <select
-                  id="activityType"
-                  name="activityType"
-                  value={formData.activityType}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                >
-                  <option value="">Any type</option>
-                  <option value="craft">Arts & Crafts</option>
-                  <option value="science">Science Experiment</option>
-                  <option value="cooking">Cooking/Baking</option>
-                  <option value="game">Educational Game</option>
-                  <option value="physical">Physical Activity</option>
-                  <option value="storytelling">Storytelling</option>
-                  <option value="music">Music & Movement</option>
-                </select>
-              </div>
-
-              {/* Enhancement Options Dropdown */}
-              <div className="border border-emerald-200 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setShowAdditional(!showAdditional)}
-                  className="w-full flex items-center justify-between p-3 md:p-4 text-left text-emerald-700 font-medium hover:bg-emerald-50 transition-colors active:bg-emerald-100 touch-manipulation"
-                >
-                  <span className="text-sm md:text-base">Enhancement Options</span>
-                  <svg
-                    className={`w-5 h-5 transition-transform ${showAdditional ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+                <h3 className="text-xl font-semibold text-emerald-800 mb-4">
+                  🧠 Educational & Fun
+                </h3>
+                <p className="text-emerald-700 mb-4">
+                  Every activity is designed to promote learning while keeping your child engaged and entertained. Our AI considers developmental milestones and educational objectives.
+                </p>
                 
-                {showAdditional && (
-                  <div className="p-3 md:p-4 border-t border-emerald-200 space-y-3 md:space-y-4">
-                    {/* Personality */}
-                    <div>
-                      <label htmlFor="personality" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                        Personality Traits
-                      </label>
-                      <select
-                        id="personality"
-                        name="personality"
-                        value={formData.personality}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                      >
-                        <option value="">Select personality type</option>
-                        <option value="active">Active & Energetic</option>
-                        <option value="calm">Calm & Thoughtful</option>
-                        <option value="creative">Creative & Imaginative</option>
-                        <option value="social">Social & Outgoing</option>
-                        <option value="analytical">Analytical & Curious</option>
-                      </select>
-                    </div>
-
-                    {/* Interests */}
-                    <div>
-                      <label htmlFor="interests" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                        Interests & Favorite Things
-                      </label>
-                      <textarea
-                        id="interests"
-                        name="interests"
-                        value={formData.interests}
-                        onChange={handleInputChange}
-                        rows={3}
-                        className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm resize-none"
-                        placeholder="e.g., dinosaurs, princesses, building blocks, drawing, music..."
-                      />
-                    </div>
-
-                    {/* Child Dislikes */}
-                    <div>
-                      <label htmlFor="childDislikes" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                        Things Your Child Dislikes or Avoids
-                      </label>
-                      <textarea
-                        id="childDislikes"
-                        name="childDislikes"
-                        value={formData.childDislikes}
-                        onChange={handleInputChange}
-                        rows={2}
-                        className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm resize-none"
-                        placeholder="e.g., loud noises, messy activities, certain textures, specific themes..."
-                      />
-                    </div>
-
-                    {/* Developmental Stage */}
-                    <div>
-                      <label htmlFor="developmentalStage" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                        Skills Focus
-                      </label>
-                      <select
-                        id="developmentalStage"
-                        name="developmentalStage"
-                        value={formData.developmentalStage}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                      >
-                        <option value="">Any skills area</option>
-                        <option value="fine motor">Fine Motor Skills</option>
-                        <option value="gross motor">Gross Motor Skills</option>
-                        <option value="language">Language Development</option>
-                        <option value="cognitive">Cognitive Skills</option>
-                        <option value="social">Social Skills</option>
-                        <option value="emotional">Emotional Development</option>
-                      </select>
-                    </div>
-
-                    {/* Available Materials */}
-                    <div>
-                      <label htmlFor="availableMaterials" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                        Available Materials at Home
-                      </label>
-                      <textarea
-                        id="availableMaterials"
-                        name="availableMaterials"
-                        value={formData.availableMaterials}
-                        onChange={handleInputChange}
-                        rows={3}
-                        className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm resize-none"
-                        placeholder="e.g., paper, crayons, play dough, cardboard boxes, kitchen items..."
-                      />
-                    </div>
-
-                    {/* Learning Goals */}
-                    <div>
-                      <label htmlFor="learningGoals" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                        Learning Goals
-                      </label>
-                      <textarea
-                        id="learningGoals"
-                        name="learningGoals"
-                        value={formData.learningGoals}
-                        onChange={handleInputChange}
-                        rows={2}
-                        className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm resize-none"
-                        placeholder="What would you like your child to learn or practice?"
-                      />
-                    </div>
-                  </div>
-                )}
+                <h3 className="text-xl font-semibold text-emerald-800 mb-4">
+                  📱 Easy to Use
+                </h3>
+                <p className="text-emerald-700 mb-4">
+                  Simply fill out our quick form with your child's information, and our AI will generate the perfect activity. No complex setup or technical knowledge required.
+                </p>
               </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="p-3 md:p-4 bg-red-50 border border-red-200 rounded-md">
-                  <p className="text-red-700 text-sm md:text-base">{error}</p>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-                <button
-                  type="submit"
-                  disabled={isGenerating}
-                  className="flex-1 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-400 text-white font-semibold py-3 md:py-3 px-4 md:px-6 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed text-base md:text-base touch-manipulation"
-                >
-                  {isGenerating ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Generating Activity...
-                    </span>
-                  ) : (
-                    'Generate Activity'
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-4 md:px-6 py-3 md:py-3 border-2 border-emerald-700 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer text-base md:text-base touch-manipulation"
-                >
-                  Reset
-                </button>
+              
+              <div>
+                <h3 className="text-xl font-semibold text-emerald-800 mb-4">
+                  🎨 Diverse Activity Types
+                </h3>
+                <p className="text-emerald-700 mb-4">
+                  From arts and crafts to science experiments, cooking activities to physical games - our generator covers all types of learning through play.
+                </p>
+                
+                <h3 className="text-xl font-semibold text-emerald-800 mb-4">
+                  👨‍👩‍👧‍👦 Family Bonding
+                </h3>
+                <p className="text-emerald-700 mb-4">
+                  Choose between independent activities for your child or family activities that bring everyone together for quality bonding time.
+                </p>
               </div>
-            </form>
+            </div>
           </div>
+        </section>
 
-          {/* Results Section */}
-          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
-            <h2 className="text-xl md:text-2xl font-bold text-emerald-800 mb-4 md:mb-6">
-              Generated Activity
+        {/* FAQ Section for SEO */}
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-emerald-50">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-emerald-800 mb-8 text-center">
+              Frequently Asked Questions
             </h2>
             
-            {!generatedActivity && !isGenerating && (
-              <div className="text-center py-8 md:py-12">
-                <div className="text-4xl md:text-6xl mb-3 md:mb-4">🎨</div>
-                <p className="text-emerald-600 text-base md:text-lg px-4">
-                  Fill out the form to generate a personalized activity for your child!
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-emerald-800 mb-2">
+                  What age groups are supported?
+                </h3>
+                <p className="text-emerald-700">
+                  Our activity generator supports children from 2-7 years old, with activities specifically tailored to each developmental stage and age group.
                 </p>
               </div>
-            )}
-
-            {isGenerating && (
-              <div className="text-center py-8 md:py-12">
-                <div className="animate-spin text-4xl md:text-6xl mb-3 md:mb-4">⚡</div>
-                <p className="text-emerald-600 text-base md:text-lg px-4">
-                  Creating a perfect activity for your child...
+              
+              <div>
+                <h3 className="text-lg font-semibold text-emerald-800 mb-2">
+                  Do I need special materials?
+                </h3>
+                <p className="text-emerald-700">
+                  No! Our AI prioritizes using common household items and materials you likely already have at home. You can also specify what materials you have available.
                 </p>
               </div>
-            )}
-
-            {generatedActivity && (
-              <div className="space-y-4 md:space-y-6">
-                {/* Activity Header */}
-                <div className="bg-emerald-50 p-3 md:p-4 rounded-lg border border-emerald-200">
-                  <h3 className="text-lg md:text-xl font-bold text-emerald-800 mb-2">
-                    {generatedActivity.title}
-                  </h3>
-                  <p className="text-emerald-700 text-sm md:text-base leading-relaxed">
-                    {generatedActivity.description}
-                  </p>
-                </div>
-
-                {/* Materials Section */}
-                {generatedActivity.materials && (
-                  <div className="bg-white p-3 md:p-4 rounded-lg border border-emerald-200">
-                    <h4 className="font-semibold text-emerald-800 mb-2 md:mb-3 flex items-center text-sm md:text-base">
-                      <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                      Materials Needed
-                    </h4>
-                    <ul className="list-disc list-inside text-emerald-700 space-y-1 text-sm md:text-base">
-                      {generatedActivity.materials.map((material, index) => (
-                        <li key={index} className="leading-relaxed">{material}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Instructions Section */}
-                {generatedActivity.instructions && (
-                  <div className="bg-white p-3 md:p-4 rounded-lg border border-emerald-200">
-                    <h4 className="font-semibold text-emerald-800 mb-2 md:mb-3 flex items-center text-sm md:text-base">
-                      <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Instructions
-                    </h4>
-                    <ol className="list-decimal list-inside text-emerald-700 space-y-2 text-sm md:text-base">
-                      {generatedActivity.instructions.map((instruction, index) => (
-                        <li key={index} className="leading-relaxed">{instruction}</li>
-                      ))}
-                    </ol>
-                  </div>
-                )}
-
-                {/* Learning Outcomes Dropdown */}
-                {generatedActivity.learningOutcomes && (
-                  <div className="bg-white rounded-lg border border-emerald-200 shadow-sm">
-                    <button
-                      onClick={() => setShowLearningOutcomes(!showLearningOutcomes)}
-                      className="w-full text-left p-3 md:p-4 font-semibold text-emerald-800 hover:bg-emerald-50 active:bg-emerald-100 transition-colors cursor-pointer flex items-center justify-between rounded-lg touch-manipulation"
-                    >
-                      <span className="flex items-center text-sm md:text-base">
-                        <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                        Learning Outcomes
-                      </span>
-                      <svg 
-                        className={`w-4 h-4 md:w-5 md:h-5 transform transition-transform flex-shrink-0 ${showLearningOutcomes ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {showLearningOutcomes && (
-                      <div className="p-3 md:p-4 pt-0 border-t border-emerald-200">
-                        <ul className="list-disc list-inside text-emerald-700 space-y-2 text-sm md:text-base">
-                          {generatedActivity.learningOutcomes.map((outcome, index) => (
-                            <li key={index} className="leading-relaxed">{outcome}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Tips for Parents Dropdown */}
-                {generatedActivity.tips && (
-                  <div className="bg-white rounded-lg border border-emerald-200 shadow-sm">
-                    <button
-                      onClick={() => setShowTips(!showTips)}
-                      className="w-full text-left p-3 md:p-4 font-semibold text-emerald-800 hover:bg-emerald-50 active:bg-emerald-100 transition-colors cursor-pointer flex items-center justify-between rounded-lg touch-manipulation"
-                    >
-                      <span className="flex items-center text-sm md:text-base">
-                        <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Tips for Parents
-                      </span>
-                      <svg 
-                        className={`w-4 h-4 md:w-5 md:h-5 transform transition-transform flex-shrink-0 ${showTips ? 'rotate-180' : ''}`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {showTips && (
-                      <div className="p-3 md:p-4 pt-0 border-t border-emerald-200">
-                        <ul className="list-disc list-inside text-emerald-700 space-y-2 text-sm md:text-base">
-                          {generatedActivity.tips.map((tip, index) => (
-                            <li key={index} className="leading-relaxed">{tip}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="bg-emerald-50 p-3 md:p-4 rounded-lg border border-emerald-200">
-                  <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
-                    <button
-                      onClick={copyActivityToClipboard}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-3 md:px-4 rounded-lg transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
-                    >
-                      <FontAwesomeIcon 
-                        icon={isCopied ? faCheck : faCopy} 
-                        className="mr-2 text-sm md:text-base" 
-                      />
-                      {isCopied ? 'Copied!' : 'Copy Activity'}
-                    </button>
-                    <button
-                      onClick={() => window.print()}
-                      className="flex-1 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-semibold py-3 px-3 md:px-4 rounded-lg transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
-                    >
-                      <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                      </svg>
-                      Print Activity
-                    </button>
-                    <button
-                      onClick={discardActivity}
-                      className="flex-1 border-2 border-emerald-700 text-emerald-700 font-semibold py-3 px-3 md:px-4 rounded-lg hover:bg-emerald-50 active:bg-emerald-100 transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
-                    >
-                      <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      <span className="hidden sm:inline">Generate Another</span>
-                      <span className="sm:hidden">New Activity</span>
-                    </button>
-                  </div>
-                </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-emerald-800 mb-2">
+                  How long do activities take?
+                </h3>
+                <p className="text-emerald-700">
+                  You can choose activity durations from 10 minutes to over an hour, perfect for different situations and attention spans.
+                </p>
               </div>
-            )}
+              
+              <div>
+                <h3 className="text-lg font-semibold text-emerald-800 mb-2">
+                  Are the activities educational?
+                </h3>
+                <p className="text-emerald-700">
+                  Yes! Every activity is designed with learning objectives in mind, targeting various developmental areas like fine motor skills, cognitive development, language skills, and more.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </>
   );
-};
-
-export default AtHomePage;
+}

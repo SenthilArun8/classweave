@@ -1,4 +1,40 @@
-'use client';
+// Metadata for Privacy Policy page
+export const metadata = {
+  title: 'Privacy Policy | ClassWeave AI Educational Platform',
+  description: 'Read ClassWeave\'s comprehensive privacy policy. Learn how we protect your data and maintain the security of your educational information.',
+  keywords: [
+    'privacy policy',
+    'data protection',
+    'ClassWeave privacy',
+    'educational data privacy',
+    'child data protection',
+    'COPPA compliance',
+    'GDPR compliance',
+    'data security',
+    'privacy rights',
+    'educational platform privacy'
+  ],
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://classweave.vercel.app/privacy-policy',
+    siteName: 'ClassWeave',
+    title: 'Privacy Policy | ClassWeave AI',
+    description: 'Learn about ClassWeave\'s commitment to protecting your privacy and securing your educational data.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy | ClassWeave AI',
+    description: 'Learn about our privacy practices and data protection measures.',
+  },
+  alternates: {
+    canonical: 'https://classweave.vercel.app/privacy-policy',
+  },
+};
 
 export default function PrivacyPolicy() {
   return (

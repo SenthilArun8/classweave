@@ -73,6 +73,56 @@ export default function RootLayout({ children }) {
         ></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen flex flex-col`} suppressHydrationWarning={true}>
+        {/* Structured Data for SEO */}
+        <Script id="structured-data" type="application/ld+json" strategy="beforeInteractive">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "ClassWeave",
+              "alternateName": "ClassWeave AI",
+              "description": "AI-powered educational platform for personalized learning activities for toddlers, preschoolers, and students",
+              "url": "https://classweave.vercel.app",
+              "sameAs": [
+                "https://www.linkedin.com/in/senthil-kirthieswar-631631334/"
+              ],
+              "applicationCategory": "EducationalApplication",
+              "operatingSystem": "Web",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              },
+              "creator": {
+                "@type": "Person",
+                "name": "Senthil Kirthieswar",
+                "url": "https://www.linkedin.com/in/senthil-kirthieswar-631631334/"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "ClassWeave",
+                "url": "https://classweave.vercel.app"
+              },
+              "featureList": [
+                "AI-powered activity generation",
+                "Personalized learning experiences",
+                "Student profile management",
+                "Educational story creation",
+                "At-home activity suggestions",
+                "Progress tracking",
+                "Parent-educator communication"
+              ],
+              "audience": {
+                "@type": "EducationalAudience",
+                "educationalRole": ["parent", "teacher", "educator", "caregiver"]
+              },
+              "educationalLevel": ["preschool", "kindergarten", "elementary"],
+              "learningResourceType": ["activity", "lesson plan", "educational game"],
+              "isAccessibleForFree": true
+            }
+          `}
+        </Script>
+
         {/* Google Analytics with Consent Mode - Moved to body to prevent hydration issues */}
         <Script id="google-analytics-init" strategy="afterInteractive">
           {`

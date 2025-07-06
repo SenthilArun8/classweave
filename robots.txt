@@ -1,4 +1,37 @@
+# ClassWeave AI - Educational Platform for Personalized Learning
+# https://classweave.vercel.app
+
 User-agent: *
 Allow: /
 
-Sitemap: /sitemap.xml
+# Allow crawling of main public pages
+Allow: /about
+Allow: /at-home
+Allow: /sample-students
+Allow: /sample-story
+Allow: /privacy-policy
+
+# Disallow crawling of user-specific and dynamic content
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /students/
+Disallow: /saved-activities/
+Disallow: /saved-stories/
+Disallow: /discarded-activities/
+Disallow: /edit-student/
+Disallow: /add-student
+Disallow: /all-saved-activities
+Disallow: /past-activities
+Disallow: /student-discarded-activities
+Disallow: /saved-activity
+Disallow: /under-construction
+Disallow: /coming-soon
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://classweave.vercel.app/sitemap.xml
