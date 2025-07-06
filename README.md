@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ClassWeave - AI-Powered Daycare Management & Activity Generation
 
-## Getting Started
+ClassWeave is a comprehensive Next.js application designed for daycare centers and parents, featuring AI-powered story generation, activity suggestions, and student management capabilities.
 
-First, run the development server:
+## 🌐 Live Application
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+🚀 **[Visit ClassWeave Live](https://classweave.vercel.app/)**
+
+Experience the full application features including AI-powered activity generation, student management, and personalized story creation.
+
+## 🌟 Features
+
+### For Daycare Centers
+- **Student Management**: Add, edit, and manage student profiles with detailed information
+- **AI Story Generation**: Create personalized stories about daily activities for each child
+- **Activity Tracking**: Log and manage daily activities for students
+- **Sample Data**: Demo functionality with sample students and stories
+- **User Authentication**: Secure login system for daycare staff
+
+### For Parents
+- **At-Home Activities**: Generate personalized educational activities for children at home
+- **Activity Customization**: Tailor activities based on:
+  - Child's age and developmental stage
+  - Interests and personality traits
+  - Available materials and time
+  - Location preferences (indoor/outdoor)
+  - Number of children participating
+- **Activity Management**: Copy, print, and save generated activities
+- **Non-Repetitive Generation**: Smart system avoids repeating similar activities
+
+### Technical Features
+- **AI Integration**: Google Vertex AI (Gemini) for content generation
+- **Database**: MongoDB for data persistence
+- **Authentication**: JWT and PASETO token-based authentication
+- **Responsive Design**: Mobile-friendly interface with Tailwind CSS
+- **Cookie Consent**: GDPR-compliant privacy management
+- **Analytics Integration**: Google Analytics and AdSense support
+
+## 📱 Main Pages
+
+- **Home** (`/`) - Landing page with navigation to key features
+- **Students** (`/students`) - Student management interface
+- **Add Student** (`/add-student`) - Add new students to the system
+- **At Home Activities** (`/at-home`) - Generate activities for parents
+- **Sample Stories** (`/sample-story`) - Demo story generation
+- **Sample Students** (`/sample-students`) - Demo student profiles
+- **About** (`/about`) - Information about the platform
+
+## 🔧 Technology Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: JavaScript/JSX
+- **Styling**: Tailwind CSS
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT + PASETO
+- **AI**: Google Vertex AI (Gemini 2.0)
+- **Email**: Nodemailer integration
+
+## 🏗️ Project Structure
+
+```
+classweave/
+├── app/                    # Next.js App Router pages
+│   ├── api/               # API routes
+│   ├── components/        # Reusable React components
+│   ├── contexts/          # React Context providers
+│   └── [pages]/          # Application pages
+├── lib/                   # Utility libraries
+│   ├── config/           # Database and service configurations
+│   ├── controllers/      # Business logic controllers
+│   ├── middleware/       # Custom middleware
+│   ├── models/           # MongoDB schemas
+│   └── utils/            # Helper utilities
+├── public/               # Static assets
+└── utils/                # Additional utilities
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔐 Authentication & Security
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- JWT-based authentication for secure access
+- PASETO tokens for additional security
+- Environment variable protection for sensitive data
+- GDPR-compliant cookie consent management
+- Secure API endpoint protection
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎨 UI/UX Features
 
-## Learn More
+- Responsive design for all device sizes
+- Interactive dropdowns and animations
+- Loading states and error handling
+- Print-friendly activity layouts
+- Copy-to-clipboard functionality
 
-To learn more about Next.js, take a look at the following resources:
+## 🤖 AI Integration
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The application uses Google Vertex AI for:
+- **Story Generation**: Creating personalized stories about student activities
+- **Activity Generation**: Generating educational at-home activities
+- **Content Personalization**: Tailoring content based on child characteristics
+- **Smart Repetition Avoidance**: Ensuring diverse content generation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📊 Database Schema
 
-## Deploy on Vercel
+### Student Model
+- Personal information (name, age, preferences)
+- Activity history and stories
+- Parent/guardian contact details
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### User Model
+- Authentication credentials
+- Role-based access control
+- Profile information
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🚀 Deployment
+
+The application is optimized for deployment on:
+- **Vercel** (recommended for Next.js apps)
+- **Render** or other cloud platforms
+- Custom server deployments
+
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
