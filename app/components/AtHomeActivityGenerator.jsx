@@ -172,7 +172,7 @@ Generated on: ${new Date().toLocaleDateString()}
         {/* Form Section */}
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
           <h2 className="text-xl md:text-2xl font-bold text-emerald-800 mb-4 md:mb-6">
-            Tell Us About Your Child
+            Activity Specifications
           </h2>
           
           <form onSubmit={generateActivity} className="space-y-4 md:space-y-6">
