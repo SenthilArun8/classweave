@@ -43,6 +43,7 @@ const AtHomeActivityGenerator = () => {
   const [error, setError] = useState('');
   const [showLearningOutcomes, setShowLearningOutcomes] = useState(false);
   const [showTips, setShowTips] = useState(false);
+  const [showGamification, setShowGamification] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [discardedActivities, setDiscardedActivities] = useState([]);
   const resultsRef = useRef(null);
@@ -148,6 +149,9 @@ const AtHomeActivityGenerator = () => {
     setGeneratedActivity(null);
     setError('');
     setDiscardedActivities([]);
+    setShowLearningOutcomes(false);
+    setShowTips(false);
+    setShowGamification(false);
   };
 
   // Copy activity to clipboard
@@ -171,6 +175,9 @@ ${generatedActivity.learningOutcomes ? generatedActivity.learningOutcomes.map(ou
 
 Tips for Parents:
 ${generatedActivity.tips ? generatedActivity.tips.map(tip => `• ${tip}`).join('\n') : 'No tips provided'}
+
+Gamification:
+${generatedActivity.gamification ? generatedActivity.gamification.map(game => `• ${game}`).join('\n') : 'No gamification ideas provided'}
 
 Generated on: ${new Date().toLocaleDateString()}
       `.trim();
@@ -393,7 +400,6 @@ Generated on: ${new Date().toLocaleDateString()}
               </div>
             )}
 
-            {/* Activity Type */}
             <div>
               <label htmlFor="activityType" className="flex items-center text-sm font-medium text-emerald-700 mb-1 md:mb-2">
                 <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -707,6 +713,7 @@ Generated on: ${new Date().toLocaleDateString()}
           )}
 
           {generatedActivity && (
+            <>
             <div className="space-y-4 md:space-y-6">
               {/* Activity Header */}
               <div className="bg-emerald-50 p-3 md:p-4 rounded-lg border border-emerald-200">
@@ -820,41 +827,75 @@ Generated on: ${new Date().toLocaleDateString()}
                 </div>
               )}
 
-              {/* Action Buttons */}
-              <div className="bg-emerald-50 p-3 md:p-4 rounded-lg border border-emerald-200">
-                <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+              {/* Gamification Dropdown */}
+              {generatedActivity.gamification && generatedActivity.gamification.length > 0 && (
+                <div className="bg-white rounded-lg border border-emerald-200 shadow-sm">
                   <button
-                    onClick={copyActivityToClipboard}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-3 md:px-4 rounded-lg transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
+                    onClick={() => setShowGamification(!showGamification)}
+                    className="w-full text-left p-3 md:p-4 font-semibold text-emerald-800 hover:bg-emerald-50 active:bg-emerald-100 transition-colors cursor-pointer flex items-center justify-between rounded-lg touch-manipulation"
                   >
-                    <FontAwesomeIcon 
-                      icon={isCopied ? faCheck : faCopy} 
-                      className="mr-2 text-sm md:text-base" 
-                    />
-                    {isCopied ? 'Copied!' : 'Copy Activity'}
-                  </button>
-                  <button
-                    onClick={() => window.print()}
-                    className="flex-1 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-semibold py-3 px-3 md:px-4 rounded-lg transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
-                  >
-                    <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    <span className="flex items-center text-sm md:text-base">
+                      <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 12.17l7.59-7.59L19 6l-9 9z" />
+                      </svg>
+                      Make it a Game!
+                    </span>
+                    <svg
+                      className={`w-4 h-4 md:w-5 md:h-5 transform transition-transform flex-shrink-0 ${showGamification ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
-                    Print Activity
                   </button>
-                  <button
-                    onClick={discardActivity}
-                    className="flex-1 border-2 border-emerald-700 text-emerald-700 font-semibold py-3 px-3 md:px-4 rounded-lg hover:bg-emerald-50 active:bg-emerald-100 transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
-                  >
-                    <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span className="hidden sm:inline">Generate Another</span>
-                    <span className="sm:hidden">New Activity</span>
-                  </button>
+                  {showGamification && (
+                    <div className="p-3 md:p-4 pt-0 border-t border-emerald-200">
+                      <ul className="list-disc list-inside text-emerald-700 space-y-2 text-sm md:text-base">
+                        {generatedActivity.gamification.map((game, index) => (
+                          <li key={index} className="leading-relaxed">{game}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
+              )}
+            </div>
+
+            <div className="bg-emerald-50 p-3 md:p-4 rounded-lg border border-emerald-200 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
+                <button
+                  onClick={copyActivityToClipboard}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-3 md:px-4 rounded-lg transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
+                >
+                  <FontAwesomeIcon 
+                    icon={isCopied ? faCheck : faCopy} 
+                    className="mr-2 text-sm md:text-base" 
+                  />
+                  {isCopied ? 'Copied!' : 'Copy Activity'}
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="flex-1 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-semibold py-3 px-3 md:px-4 rounded-lg transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
+                >
+                  <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Print Activity
+                </button>
+                <button
+                  onClick={discardActivity}
+                  className="flex-1 border-2 border-emerald-700 text-emerald-700 font-semibold py-3 px-3 md:px-4 rounded-lg hover:bg-emerald-50 active:bg-emerald-100 transition-colors cursor-pointer flex items-center justify-center text-sm md:text-base touch-manipulation"
+                >
+                  <svg className="w-4 h-4 md:w-5 md:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span className="hidden sm:inline">Generate Another</span>
+                  <span className="sm:hidden">New Activity</span>
+                </button>
               </div>
             </div>
+            </>
           )}
         </div>
       </div>

@@ -118,6 +118,7 @@ PRE-TEEN GUIDELINES (9-10 years):
 // Activity generation prompt template
 const activityPromptTemplate = (childInfo, options, discardedActivities = []) => `
 You are an expert early childhood educator and child development specialist creating personalized educational but MAINLY engaging, compelling activities for children to do at home.
+Your primary goal is to generate CREATIVE and VARIED activities. Avoid repeating common or stereotypical activities (e.g., simple scavenger hunts, basic coloring pages, rainbow ribbon dances) unless you can provide a unique, imaginative twist. If the user provides minimal information, use your expertise to suggest something unexpected and delightful that could introduce a new interest.
 
 Create a personalized activity based on the following details:
 
@@ -191,10 +192,11 @@ ${options.availableMaterials ? `10. Uses materials mentioned or common household
 13. Includes clear, step-by-step instructions
 14. Provides educational value and learning outcomes
 15. Includes helpful tips for parents/caregivers
-16. ${options.parentInvolved === false || options.parentInvolved === 'none' ? 'Uses only SAFE, NON-TOXIC, AGE-APPROPRIATE materials without supervision risks' : 
+16. Includes a "gamification" section with ideas for challenges, points, or rewards to make the activity more engaging.
+17. ${options.parentInvolved === false || options.parentInvolved === 'none' ? 'Uses only SAFE, NON-TOXIC, AGE-APPROPRIATE materials without supervision risks' : 
        options.parentInvolved === 'minimal' ? 'Uses mostly safe materials with minimal risk, suitable for light supervision' :
        'Includes proper supervision guidelines for parent-involved activities'}
-${discardedActivities.length > 0 ? '17. Is COMPLETELY DIFFERENT from the previously generated activities listed above' : ''}
+${discardedActivities.length > 0 ? '18. Is COMPLETELY DIFFERENT from the previously generated activities listed above' : ''}
 
 ${getAgeSpecificGuidelines(childInfo.age)}
 
@@ -205,7 +207,8 @@ Format the response as a JSON object with the following structure:
   "materials": ["list", "of", "required", "materials"],
   "instructions": ["step 1", "step 2", "step 3", "etc."],
   "learningOutcomes": ["what the child will learn", "skills developed"],
-  "tips": ["helpful tips for parents", "safety considerations", "variations"]
+  "tips": ["helpful tips for parents", "safety considerations", "variations"],
+  "gamification": ["ideas for challenges, points, or rewards to make it more engaging"]
 }
 `;
 
@@ -739,6 +742,12 @@ function generateFallbackActivity({
       "Encourages creativity and imagination",
       "Promotes language development through description",
       numberOfChildren > 1 ? "Builds social interaction skills" : "Builds confidence through independent exploration"
+    ],
+    gamification: [
+      "Challenge: Can you complete the activity in a certain time?",
+      "Reward: Earn a sticker or a special privilege for finishing.",
+      "Level Up: Try a harder version of the activity next time.",
+      numberOfChildren > 1 ? "Teamwork Challenge: Work together to finish the task and earn a team reward." : "Personal Best: Try to do better than you did last time."
     ],
     tips: parentInvolved === 'full' ? [
       "Stay actively involved throughout the activity",
