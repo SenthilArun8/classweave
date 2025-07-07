@@ -7,7 +7,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCopy, faCheck } from '@fortawesome/free-solid-svg-icons';
@@ -33,9 +33,10 @@ const AtHomeActivityGenerator = () => {
     activityLocation: '',
     desiredActivityLength: '',
     numberOfChildren: '',
-    childDislikes: ''
+    childDislikes: '',
+    basicMaterials: []
   });
-  const [parentInvolved, setParentInvolved] = useState(false);
+  const [parentInvolved, setParentInvolved] = useState('none'); // 'none', 'minimal', 'full'
   const [showAdditional, setShowAdditional] = useState(false);
   const [generatedActivity, setGeneratedActivity] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -44,6 +45,14 @@ const AtHomeActivityGenerator = () => {
   const [showTips, setShowTips] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [discardedActivities, setDiscardedActivities] = useState([]);
+  const resultsRef = useRef(null);
+
+  // Scroll to results on mobile when activity is generated
+  useEffect(() => {
+    if (generatedActivity && window.innerWidth < 768) { // 768px is a common breakpoint for mobile
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [generatedActivity]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -54,6 +63,16 @@ const AtHomeActivityGenerator = () => {
     }));
   };
 
+  // Handle material selection
+  const handleMaterialToggle = (material) => {
+    setFormData(prev => ({
+      ...prev,
+      basicMaterials: prev.basicMaterials.includes(material)
+        ? prev.basicMaterials.filter(m => m !== material)
+        : [...prev.basicMaterials, material]
+    }));
+  };
+
   // Generate activity based on form data
   const generateActivity = async (e) => {
     e.preventDefault();
@@ -61,6 +80,24 @@ const AtHomeActivityGenerator = () => {
     setError('');
     
     try {
+      // Map selected basic materials to availableMaterials field
+      const materialLabels = {
+        paper: 'Paper/Cardboard',
+        drawing: 'Crayons/Markers/Pencils',
+        adhesive: 'Glue/Tape',
+        scissors: 'Scissors',
+        recyclables: 'Recyclables',
+        kitchen: 'Kitchen Utensils',
+        nature: 'Nature Items',
+        fabric: 'Old Clothes/Fabric',
+        water: 'Water',
+        clay: 'Play Dough/Clay'
+      };
+      
+      const selectedMaterialsText = formData.basicMaterials
+        .map(id => materialLabels[id])
+        .join(', ');
+      
       const response = await fetch('/api/ai/generateHomeActivity', {
         method: 'POST',
         headers: {
@@ -68,6 +105,9 @@ const AtHomeActivityGenerator = () => {
         },
         body: JSON.stringify({
           ...formData,
+          numberOfChildren: formData.numberOfChildren || '1',
+          availableMaterials: selectedMaterialsText || formData.availableMaterials,
+          parentInvolved,
           discardedActivities
         }),
       });
@@ -100,9 +140,10 @@ const AtHomeActivityGenerator = () => {
       activityLocation: '',
       desiredActivityLength: '',
       numberOfChildren: '',
-      childDislikes: ''
+      childDislikes: '',
+      basicMaterials: []
     });
-    setParentInvolved(false);
+    setParentInvolved('none');
     setShowAdditional(false);
     setGeneratedActivity(null);
     setError('');
@@ -170,7 +211,7 @@ Generated on: ${new Date().toLocaleDateString()}
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-16">
       <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
         {/* Form Section */}
-        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 mt-6">
           <h2 className="text-xl md:text-2xl font-bold text-emerald-800 mb-4 md:mb-6">
             Activity Specifications
           </h2>
@@ -178,148 +219,250 @@ Generated on: ${new Date().toLocaleDateString()}
           <form onSubmit={generateActivity} className="space-y-4 md:space-y-6">
             {/* Age */}
             <div>
-              <label htmlFor="age" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                Child's Age
+              <label htmlFor="age" className="flex items-center text-sm font-medium text-emerald-700 mb-1 md:mb-2">
+                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 7.5L13.5 6L8.5 6L7 7.5L1 7V9L7 8.5V11C7 13.3 8.7 15 11 15H13C15.3 15 17 13.3 17 11V8.5L21 9ZM19 17V15.5L17 15L15.5 16.5V20.5L17 22H19V20L21 19V17H19Z"/>
+                </svg>
+                Child's Age *
               </label>
               <select
                 id="age"
                 name="age"
                 value={formData.age}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                required
+                className="w-full px-4 py-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base transition-colors hover:border-emerald-400"
               >
-                <option value="">Select age</option>
-                <option value="2-3 years">2-3 years</option>
-                <option value="3-4 years">3-4 years</option>
-                <option value="4-5 years">4-5 years</option>
-                <option value="5-6 years">5-6 years</option>
-                <option value="6-7 years">6-7 years</option>
+                <option value="">Choose your child's age range</option>
+                <option value="2-3 years">2-3 years (Toddler)</option>
+                <option value="3-4 years">3-4 years (Preschooler)</option>
+                <option value="4-5 years">4-5 years (Pre-K)</option>
+                <option value="5-6 years">5-6 years (Kindergarten)</option>
+                <option value="6-7 years">6-7 years (1st Grade)</option>
+                <option value="7-8 years">7-8 years (2nd Grade)</option>
+                <option value="8-9 years">8-9 years (3rd Grade)</option>
+                <option value="9-10 years">9-10 years (4th Grade)</option>
               </select>
             </div>
 
             {/* Activity Location */}
             <div>
-              <label htmlFor="activityLocation" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                Activity Location
+              <label htmlFor="activityLocation" className="flex items-center text-sm font-medium text-emerald-700 mb-1 md:mb-2">
+                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Activity Location *
               </label>
               <select
                 id="activityLocation"
                 name="activityLocation"
                 value={formData.activityLocation}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                required
+                className="w-full px-4 py-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base transition-colors hover:border-emerald-400"
               >
-                <option value="">Select location</option>
-                <option value="indoor">Indoor</option>
-                <option value="outdoor">Outdoor</option>
-                <option value="both">Indoor & Outdoor</option>
+                <option value="">Where will the activity happen?</option>
+                <option value="indoor">🏠 Indoor (Living room, bedroom, kitchen)</option>
+                <option value="outdoor">🌳 Outdoor (Backyard, park, garden)</option>
+                <option value="both">🏠🌳 Indoor & Outdoor (Flexible location)</option>
               </select>
             </div>
 
             {/* Desired Activity Length */}
             <div>
-              <label htmlFor="desiredActivityLength" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                Desired Activity Length
+              <label htmlFor="desiredActivityLength" className="flex items-center text-sm font-medium text-emerald-700 mb-1 md:mb-2">
+                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                How long should the activity last? *
               </label>
               <select
                 id="desiredActivityLength"
                 name="desiredActivityLength"
                 value={formData.desiredActivityLength}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                required
+                className="w-full px-4 py-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base transition-colors hover:border-emerald-400"
               >
-                <option value="">Select duration</option>
-                <option value="10-20 minutes">10-20 minutes</option>
-                <option value="20-30 minutes">20-30 minutes</option>
-                <option value="30-45 minutes">30-45 minutes</option>
-                <option value="45-60 minutes">45-60 minutes</option>
-                <option value="1+ hours">1+ hours</option>
+                <option value="">Choose activity duration</option>
+                <option value="10-20 minutes">10-20 minutes (Quick activity)</option>
+                <option value="20-30 minutes">20-30 minutes (Short activity)</option>
+                <option value="30-45 minutes">30-45 minutes (Medium activity)</option>
+                <option value="45-60 minutes">45-60 minutes (Long activity)</option>
+                <option value="1+ hours">1+ hours (Extended project)</option>
               </select>
             </div>
 
-            {/* Number of Children */}
+            {/* Parent Involvement Level */}
             <div>
-              <label htmlFor="numberOfChildren" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                Number of Children for Activity
+              <label className="flex items-center text-sm font-medium text-emerald-700 mb-3">
+                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+                How much do you want to be involved? *
               </label>
-              <select
-                id="numberOfChildren"
-                name="numberOfChildren"
-                value={formData.numberOfChildren}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                required
-              >
-                <option value="">Select number</option>
-                <option value="1">1 child (solo activity)</option>
-                <option value="2">2 children</option>
-                <option value="3-4">3-4 children</option>
-                <option value="5+">5+ children (group activity)</option>
-              </select>
+              <div className="space-y-3">
+                <label className="flex items-start p-3 border border-emerald-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition-colors cursor-pointer">
+                  <input
+                    type="radio"
+                    name="parentInvolvement"
+                    value="none"
+                    checked={parentInvolved === 'none'}
+                    onChange={(e) => setParentInvolved(e.target.value)}
+                    className="mt-1 mr-3 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-emerald-300 flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center mb-1">
+                      <span className="text-lg mr-2">🚀</span>
+                      <span className="text-sm font-medium text-emerald-700">
+                        Independent Play
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-600">
+                      My child can do this completely on their own (safest materials only)
+                    </p>
+                  </div>
+                </label>
+                
+                <label className="flex items-start p-3 border border-emerald-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition-colors cursor-pointer">
+                  <input
+                    type="radio"
+                    name="parentInvolvement"
+                    value="minimal"
+                    checked={parentInvolved === 'minimal'}
+                    onChange={(e) => setParentInvolved(e.target.value)}
+                    className="mt-1 mr-3 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-emerald-300 flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center mb-1">
+                      <span className="text-lg mr-2">👀</span>
+                      <span className="text-sm font-medium text-emerald-700">
+                        Light Supervision
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-600">
+                      I'll be nearby for help but my child works mostly independently
+                    </p>
+                  </div>
+                </label>
+                
+                <label className="flex items-start p-3 border border-emerald-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 transition-colors cursor-pointer">
+                  <input
+                    type="radio"
+                    name="parentInvolvement"
+                    value="full"
+                    checked={parentInvolved === 'full'}
+                    onChange={(e) => setParentInvolved(e.target.value)}
+                    className="mt-1 mr-3 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-emerald-300 flex-shrink-0"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center mb-1">
+                      <span className="text-lg mr-2">👥</span>
+                      <span className="text-sm font-medium text-emerald-700">
+                        Active Participation
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-600">
+                      I want to be actively involved throughout the activity
+                    </p>
+                  </div>
+                </label>
+              </div>
             </div>
 
-            {/* Parent Involvement Checkbox */}
-            <div>
-              <label className="flex items-start md:items-center">
-                <input
-                  type="checkbox"
-                  checked={parentInvolved}
-                  onChange={(e) => setParentInvolved(e.target.checked)}
-                  className="mt-1 md:mt-0 mr-3 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-emerald-300 rounded flex-shrink-0"
-                />
-                <span className="text-sm font-medium text-emerald-700 leading-snug">
-                  Parent-involved activities (requires supervision/participation)
-                </span>
-              </label>
-            </div>
-
-            {/* Available Time - Only show if parent involved is checked */}
-            {parentInvolved && (
-              <div>
-                <label htmlFor="availableTime" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                  Available Time for Activity
+            {/* Available Time - Only show if parent involved is minimal or full */}
+            {(parentInvolved === 'minimal' || parentInvolved === 'full') && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <label htmlFor="availableTime" className="flex items-center text-sm font-medium text-blue-700 mb-2">
+                  <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  How much time can you dedicate? *
                 </label>
                 <select
                   id="availableTime"
                   name="availableTime"
                   value={formData.availableTime}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
-                  required={parentInvolved}
+                  className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base transition-colors hover:border-blue-400 bg-white"
                 >
-                  <option value="">Select duration</option>
-                  <option value="15-30 minutes">15-30 minutes</option>
-                  <option value="30-45 minutes">30-45 minutes</option>
-                  <option value="45-60 minutes">45-60 minutes</option>
-                  <option value="1+ hours">1+ hours</option>
+                  <option value="">Select your available time</option>
+                  <option value="15-30 minutes">⏱️ 15-30 minutes (Quick help)</option>
+                  <option value="30-45 minutes">⏰ 30-45 minutes (Moderate involvement)</option>
+                  <option value="45-60 minutes">🕐 45-60 minutes (Extended time)</option>
+                  <option value="1+ hours">⏳ 1+ hours (Full participation)</option>
                 </select>
               </div>
             )}
 
             {/* Activity Type */}
             <div>
-              <label htmlFor="activityType" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
-                Activity Type Preference
+              <label htmlFor="activityType" className="flex items-center text-sm font-medium text-emerald-700 mb-1 md:mb-2">
+                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4 4 4 0 004-4V5z" />
+                </svg>
+                What type of activity do you prefer? (Optional)
               </label>
               <select
                 id="activityType"
                 name="activityType"
                 value={formData.activityType}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
+                className="w-full px-4 py-3 border border-emerald-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base transition-colors hover:border-emerald-400"
               >
-                <option value="">Any type</option>
-                <option value="craft">Arts & Crafts</option>
-                <option value="science">Science Experiment</option>
-                <option value="cooking">Cooking/Baking</option>
-                <option value="game">Educational Game</option>
-                <option value="physical">Physical Activity</option>
-                <option value="storytelling">Storytelling</option>
-                <option value="music">Music & Movement</option>
+                <option value="">🎯 Any type (Surprise me!)</option>
+                <option value="craft">🎨 Arts & Crafts</option>
+                <option value="science">🔬 Science Experiment</option>
+                <option value="cooking">👩‍🍳 Cooking/Baking</option>
+                <option value="game">🎲 Educational Game</option>
+                <option value="physical">🏃‍♂️ Physical Activity</option>
+                <option value="storytelling">📚 Storytelling</option>
+                <option value="music">🎵 Music & Movement</option>
               </select>
+            </div>
+
+            {/* Basic Materials Available */}
+            <div>
+              <label className="flex items-center text-sm font-medium text-emerald-700 mb-3">
+                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 002 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v2M7 7h10" />
+                </svg>
+                What basic materials do you have available? (Optional)
+              </label>
+              <p className="text-xs text-emerald-600 mb-3">Select any materials you have at home - this helps create more personalized activities</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
+                {[
+                  { id: 'paper', label: 'Paper/Cardboard', icon: '📄' },
+                  { id: 'drawing', label: 'Crayons/Markers', icon: '🖍️' },
+                  { id: 'adhesive', label: 'Glue/Tape', icon: '📎' },
+                  { id: 'scissors', label: 'Scissors', icon: '✂️' },
+                  { id: 'recyclables', label: 'Recyclables', icon: '♻️' },
+                  { id: 'kitchen', label: 'Kitchen Utensils', icon: '🥄' },
+                  { id: 'nature', label: 'Nature Items', icon: '🍃' },
+                  { id: 'fabric', label: 'Old Clothes/Fabric', icon: '👕' },
+                  { id: 'water', label: 'Water', icon: '💧' },
+                  { id: 'clay', label: 'Play Dough/Clay', icon: '🎨' }
+                ].map((material) => (
+                  <button
+                    key={material.id}
+                    type="button"
+                    onClick={() => handleMaterialToggle(material.id)}
+                    className={`p-3 border-2 rounded-lg transition-all duration-200 text-center touch-manipulation ${
+                      formData.basicMaterials.includes(material.id)
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-md'
+                        : 'border-emerald-200 bg-white text-emerald-600 hover:border-emerald-300 hover:bg-emerald-50'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">{material.icon}</div>
+                    <div className="text-xs font-medium leading-tight">{material.label}</div>
+                  </button>
+                ))}
+              </div>
+              {formData.basicMaterials.length > 0 && (
+                <div className="mt-3 p-2 bg-emerald-50 rounded-lg">
+                  <p className="text-xs text-emerald-700">
+                    ✓ Selected: {formData.basicMaterials.length} material{formData.basicMaterials.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Enhancement Options Dropdown */}
@@ -329,7 +472,12 @@ Generated on: ${new Date().toLocaleDateString()}
                 onClick={() => setShowAdditional(!showAdditional)}
                 className="w-full flex items-center justify-between p-3 md:p-4 text-left text-emerald-700 font-medium hover:bg-emerald-50 transition-colors active:bg-emerald-100 touch-manipulation"
               >
-                <span className="text-sm md:text-base">Enhancement Options</span>
+                <span className="text-sm md:text-base flex items-center">
+                  <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  Enhancement Options
+                </span>
                 <svg
                   className={`w-5 h-5 transition-transform ${showAdditional ? 'rotate-180' : ''}`}
                   fill="none"
@@ -342,7 +490,26 @@ Generated on: ${new Date().toLocaleDateString()}
               
               {showAdditional && (
                 <div className="p-3 md:p-4 border-t border-emerald-200 space-y-3 md:space-y-4">
-                  {/* ...existing additional fields... */}
+                  {/* Number of Children */}
+                  <div>
+                    <label htmlFor="numberOfChildren" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
+                      How many children will participate?
+                    </label>
+                    <select
+                      id="numberOfChildren"
+                      name="numberOfChildren"
+                      value={formData.numberOfChildren}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2.5 md:py-2 border border-emerald-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base md:text-sm"
+                    >
+                      <option value="">Select number of children (Default: 1)</option>
+                      <option value="1">1 child (Solo activity)</option>
+                      <option value="2">2 children (Pair activity)</option>
+                      <option value="3-4">3-4 children (Small group)</option>
+                      <option value="5+">5+ children (Large group activity)</option>
+                    </select>
+                  </div>
+
                   {/* Personality */}
                   <div>
                     <label htmlFor="personality" className="block text-sm font-medium text-emerald-700 mb-1 md:mb-2">
@@ -465,33 +632,58 @@ Generated on: ${new Date().toLocaleDateString()}
               <button
                 type="submit"
                 disabled={isGenerating}
-                className="flex-1 bg-emerald-700 hover:bg-emerald-800 disabled:bg-emerald-400 text-white font-semibold py-3 md:py-3 px-4 md:px-6 rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed text-base md:text-base touch-manipulation"
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-emerald-300 disabled:to-emerald-400 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-200 cursor-pointer disabled:cursor-not-allowed text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:transform-none touch-manipulation"
               >
                 {isGenerating ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Generating Activity...
+                    Creating Your Perfect Activity...
                   </span>
                 ) : (
-                  'Generate Activity'
+                  <span className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Generate My Activity
+                  </span>
                 )}
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-4 md:px-6 py-3 md:py-3 border-2 border-emerald-700 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer text-base md:text-base touch-manipulation"
+                className="px-6 py-4 border-2 border-emerald-600 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 hover:border-emerald-700 active:bg-emerald-100 transition-all duration-200 cursor-pointer text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5 touch-manipulation flex items-center justify-center"
               >
-                Reset
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Start Over
               </button>
             </div>
           </form>
+          
+          {/* Helpful Tips */}
+          <div className="bg-gradient-to-r from-emerald-50 to-blue-50 border border-emerald-200 rounded-lg p-4 mt-6">
+            <div className="flex items-start">
+              <svg className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              <div>
+                <h4 className="font-semibold text-emerald-800 mb-2">Quick Tips for Better Activities:</h4>
+                <ul className="text-sm text-emerald-700 space-y-1">
+                  <li>• The more details you provide in Enhancement Options, the more personalized your activity will be!</li>
+                  <li>• Don't like an activity? Use "Generate Another" to get a different suggestion</li>
+                  <li>• All activities are designed to be safe and age-appropriate</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Results Section */}
-        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+        <div ref={resultsRef} className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8 mt-6">
           <h2 className="text-xl md:text-2xl font-bold text-emerald-800 mb-4 md:mb-6">
             Generated Activity
           </h2>
@@ -526,23 +718,6 @@ Generated on: ${new Date().toLocaleDateString()}
                 </p>
               </div>
 
-              {/* Materials Section */}
-              {generatedActivity.materials && (
-                <div className="bg-white p-3 md:p-4 rounded-lg border border-emerald-200">
-                  <h4 className="font-semibold text-emerald-800 mb-2 md:mb-3 flex items-center text-sm md:text-base">
-                    <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    Materials Needed
-                  </h4>
-                  <ul className="list-disc list-inside text-emerald-700 space-y-1 text-sm md:text-base">
-                    {generatedActivity.materials.map((material, index) => (
-                      <li key={index} className="leading-relaxed">{material}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
               {/* Instructions Section */}
               {generatedActivity.instructions && (
                 <div className="bg-white p-3 md:p-4 rounded-lg border border-emerald-200">
@@ -557,6 +732,23 @@ Generated on: ${new Date().toLocaleDateString()}
                       <li key={index} className="leading-relaxed">{instruction}</li>
                     ))}
                   </ol>
+                </div>
+              )}
+
+              {/* Materials Section */}
+              {generatedActivity.materials && (
+                <div className="bg-white p-3 md:p-4 rounded-lg border border-emerald-200">
+                  <h4 className="font-semibold text-emerald-800 mb-2 md:mb-3 flex items-center text-sm md:text-base">
+                    <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    Materials Needed
+                  </h4>
+                  <ul className="list-disc list-inside text-emerald-700 space-y-1 text-sm md:text-base">
+                    {generatedActivity.materials.map((material, index) => (
+                      <li key={index} className="leading-relaxed">{material}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
@@ -603,7 +795,7 @@ Generated on: ${new Date().toLocaleDateString()}
                   >
                     <span className="flex items-center text-sm md:text-base">
                       <svg className="w-4 h-4 md:w-5 md:h-5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m-1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Tips for Parents
                     </span>
@@ -669,5 +861,6 @@ Generated on: ${new Date().toLocaleDateString()}
     </div>
   );
 };
+
 
 export default AtHomeActivityGenerator;
